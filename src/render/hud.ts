@@ -61,7 +61,7 @@ export class Hud {
     stage.append(bar, this.message);
   }
 
-  update(sim: Attempt, record: LevelRecord | undefined, paused: boolean): void {
+  update(sim: Attempt, record: LevelRecord | undefined): void {
     const { ship, spec, level } = sim;
     const low = ship.fuel / spec.tank <= LOW_FUEL;
     // A estrela some quando o combustível cai abaixo da meta de economia.
@@ -76,11 +76,10 @@ export class Hud {
     setSpeed(this.vy, 'VY', ship.vy, ship.vy <= spec.landingVy);
     set(this.crystals, `◆ ${sim.crystalCount}/${total}${all ? ' ★' : ''}`, all ? 'ok' : '');
     set(this.time, `T ${fmt(sim.time)}`, '');
-    set(this.message, this.text(sim, record, paused), 'message');
+    set(this.message, this.text(sim, record), 'message');
   }
 
-  private text(sim: Attempt, record: LevelRecord | undefined, paused: boolean): string {
-    if (paused) return 'PAUSADO\nEsc para continuar';
+  private text(sim: Attempt, record: LevelRecord | undefined): string {
     const { lastOutcome, spec, level } = sim;
     const failure = crashText(lastOutcome, spec);
     switch (sim.phase) {

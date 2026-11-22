@@ -15,7 +15,8 @@ export class Keyboard {
 
   constructor(private readonly onKey: (code: string) => void) {
     window.addEventListener('keydown', (e) => {
-      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      // Tecla já usada por um menu.
+      if (e.defaultPrevented || e.ctrlKey || e.altKey || e.metaKey) return;
       // Ajustar um controle do painel não pode pilotar a nave.
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLButtonElement) return;
       const action = FLIGHT_KEYS[e.code];

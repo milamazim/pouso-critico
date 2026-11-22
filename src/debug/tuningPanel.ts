@@ -32,6 +32,7 @@ interface Options {
   physics: PhysicsConfig;
   onLevel: (index: number) => void;
   onShip: (index: number) => void;
+  onChange: () => void;
   onTank: () => void;
   onRestore: () => void;
 }
@@ -60,12 +61,16 @@ export class TuningPanel {
 
     this.add('h2', '', 'Mundo');
     for (const f of PHYSICS_FIELDS) {
-      this.slider(f, physics[f.key], (v) => { physics[f.key] = v; });
+      this.slider(f, physics[f.key], (v) => {
+        physics[f.key] = v;
+        this.opts.onChange();
+      });
     }
     this.add('h2', '', 'Nave');
     for (const f of SHIP_FIELDS) {
       this.slider(f, spec[f.key], (v) => {
         spec[f.key] = v;
+        this.opts.onChange();
         if (f.key === 'tank') this.opts.onTank();
       });
     }
@@ -82,7 +87,7 @@ export class TuningPanel {
     this.add(
       'p',
       'help',
-      'Setas ou WASD voam; Espaço sobe. R reinicia, Esc pausa, 1 a 3 trocam a nave e T mostra ou esconde o painel. Mudar o tanque reinicia o voo.',
+      'Setas ou WASD voam; Espaço sobe. R reinicia, Esc pausa e T mostra ou esconde o painel. Mudar o tanque reinicia o voo. Voos com valores alterados não contam para o progresso.',
     );
   }
 
