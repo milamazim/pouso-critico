@@ -40,9 +40,14 @@ export function fly(sim: Attempt, route: readonly Point[], cruise: number, waitS
       index++;
       continue;
     }
-    // Enquanto há pontos à frente na mesma direção, não precisa parar neles.
-    const passing = index > 0 && !aligning && !descending;
-    const wantX = goalVx + clamp(Math.sign(dx) * (passing ? cruise : Math.sqrt(2 * brakeX * Math.abs(dx))), cruise);
+    let speedX = Math.min(cruise, Math.sqrt(2 * brakeX * Math.abs(dx)));
+    if (index > 0 && !aligning && !descending) {
+      // Ponto de passagem: só reduz se ainda faltar subir ou descer bastante.
+      const climb = Math.abs(dy) - 8;
+      if (climb <= 0) speedX = cruise;
+      else speedX = Math.min(speedX, Math.max(8, Math.abs(dx) / (climb / 18)));
+    }
+    const wantX = goalVx + clamp(Math.sign(dx) * speedX, cruise);
     let wantY: number;
     if (descending) wantY = Math.max(spec.landingVy * 0.6, Math.min(60, Math.sqrt(2 * brakeY * Math.max(dy - 4, 0))));
     else if (dy > 0) wantY = Math.min(20, dy * 1.5);

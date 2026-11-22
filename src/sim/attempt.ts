@@ -1,6 +1,6 @@
 import { DT } from '../core/fixedStep';
 import { SCREEN_H, SCREEN_W, SHIP_SIZE } from '../data/physics';
-import { geyserAcceleration, goalAt, goalVelocity, hitsPixel } from './hazards';
+import { geyserAcceleration, goalAt, goalVelocity, hitsPixel, isActive } from './hazards';
 import { HULLS } from './hull';
 import { FUEL_CAN, ITEM_SIZE, PAD_HEIGHT, type Level, type Pad, type Point } from './level';
 import { stepShip } from './ship';
@@ -9,7 +9,7 @@ import { TerrainMask } from './terrain';
 import { NO_COMMANDS, type Commands, type PhysicsConfig, type ShipSpec, type ShipState } from './types';
 
 const HALF = SHIP_SIZE / 2;
-/** Distância além das bordas laterais e inferior que encerra a tentativa. */
+/** Distância além da borda inferior que encerra a tentativa. */
 const OUT_MARGIN = 16;
 /** Duração da explosão antes do reinício automático: 0,4 s. */
 export const CRASH_STEPS = 24;
@@ -126,10 +126,17 @@ export class Attempt {
     const push = geyserAcceleration(this.level.hazards, this.time, before.x, before.y);
     const ship = stepShip(before, commands, this.spec, this.physics, DT, { ax: 0, ay: push });
 
-    // Teto invisível.
+    // Teto e paredes invisíveis: seguram a nave inteira na tela, sem destruí-la.
     if (ship.y < HALF) {
       ship.y = HALF;
       ship.vy = Math.max(0, ship.vy);
+    }
+    if (ship.x < HALF) {
+      ship.x = HALF;
+      ship.vx = Math.max(0, ship.vx);
+    } else if (ship.x > SCREEN_W - HALF) {
+      ship.x = SCREEN_W - HALF;
+      ship.vx = Math.min(0, ship.vx);
     }
 
     this.previous = before;
@@ -159,7 +166,7 @@ export class Attempt {
     const { pixels } = HULLS[this.spec.id];
 
     for (const h of hazards) {
-      if (h.type === 'geyser') continue;
+      if (h.type === 'geyser' || !isActive(h, this.time)) continue;
       if (pixels.some((p) => hitsPixel(h, this.time, left + p.x, top + p.y))) {
         this.crash(h.type);
         return;
@@ -192,9 +199,7 @@ export class Attempt {
     }
 
     if (onTerrain) this.crash('terrain');
-    else if (ship.x < -OUT_MARGIN || ship.x > SCREEN_W + OUT_MARGIN || ship.y > SCREEN_H + OUT_MARGIN) {
-      this.crash('bounds');
-    }
+    else if (ship.y > SCREEN_H + OUT_MARGIN) this.crash('bounds');
   }
 
   /** Os dois pés cruzaram o topo da plataforma, descendo, neste passo. */

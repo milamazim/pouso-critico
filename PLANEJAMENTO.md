@@ -118,9 +118,9 @@ O HUD mostra VX e VY em verde quando estão dentro da tolerância e em vermelho 
 
 - Tocar terreno, laser ligado ou meteoro
 - Tocar uma plataforma fora das condições de pouso
-- Sair mais de 16 px pelas laterais ou por baixo
+- Cair abaixo da tela
 
-No topo há um teto invisível, que zera a velocidade vertical sem destruir a nave **[P]**.
+A nave nunca sai da tela: há um teto **[P]** e paredes laterais **[D]** invisíveis, que anulam a velocidade contra a borda sem destruir a nave.
 
 A explosão dura até 0,4 s e o reinício é automático. O jogador também pode reiniciar a qualquer momento.
 
@@ -158,7 +158,7 @@ A posição e o estado são **funções puras do tempo**, com período e fase de
 | Meteoro | Percorre uma reta e reaparece no início | Destrói | Seta piscante na borda por 0,6 s |
 | Gêiser | Liga e desliga; empurra em coluna com 60 px/s² | Não destrói | Borbulhas por 0,6 s |
 | Laser | Barreira que liga e desliga | Destrói quando ligado | Linha tracejada por 0,4 s |
-| Plataforma móvel | Oscila horizontalmente em senoide, a até 20 px/s | É o alvo de pouso | Trilho visível |
+| Plataforma móvel | Oscila horizontalmente em senoide; na campanha, sempre mais devagar que a tolerância lateral da nave inicial (10 px/s) | É o alvo de pouso | Trilho visível |
 
 ### 4.3 Estrelas
 
@@ -192,20 +192,20 @@ Revisão de 22/11/2026: diferenças ampliadas depois do primeiro teste de voo, e
 
 ### 4.5 Fases do MVP
 
-Cada fase ensina ou combina poucos elementos. Em **todas**, a linha reta entre as bases é bloqueada pelo cenário e existe uma rota livre; os testes verificam as duas coisas. A fase 1 já está calibrada. As metas das outras nove são anteriores à regra das duas bases e serão recalibradas em M5, quando essas fases forem desenhadas.
+Cada fase ensina ou combina poucos elementos. Em **todas**, a linha reta entre as bases é bloqueada pelo cenário e existe uma rota livre; os testes verificam as duas coisas. As dez fases estão desenhadas. Um piloto automático prova que as 30 estrelas são possíveis com a Vaga-lume e que as três naves concluem todas as fases com todos os cristais. Isso não mede a dificuldade para uma pessoa, que ainda precisa ser avaliada jogando.
 
 | # | Mundo | Nome | Ensina ou combina | Cristais | Tanque inicial | Meta de economia |
 |---:|---|---|---|---:|---:|---:|
 | 1 | Planície Cinza | Primeiro Toque | Decolar, passar o morro e pousar | 1 | 100% | 25% |
-| 2 | Planície Cinza | De Lado | Desvios laterais mais longos | 2 | 100% | 45% |
-| 3 | Planície Cinza | Entre Picos | Plataforma estreita e desvios | 3 | 100% | 40% |
-| 4 | Planície Cinza | Tanque Raso | Coleta de combustível | 3 | 50% | 30% |
-| 5 | Cratera Rubra | Sopro | Gêiseres | 3 | 100% | 40% |
-| 6 | Cratera Rubra | Chuva de Pedra | Meteoros | 3 | 100% | 40% |
-| 7 | Cratera Rubra | Panela de Pressão | Gêiseres + meteoros | 4 | 80% | 30% |
-| 8 | Caverna Gélida | Compasso | Lasers em corredor | 3 | 100% | 35% |
-| 9 | Caverna Gélida | Alvo Inquieto | Plataforma móvel | 4 | 90% | 30% |
-| 10 | Caverna Gélida | Pouso Crítico | Todos os perigos | 5 | 80% | 25% |
+| 2 | Planície Cinza | De Lado | Travessia longa: frear de lado | 2 | 100% | 25% |
+| 3 | Planície Cinza | Entre Picos | Dois picos, base estreita e cristal no vale | 3 | 100% | 20% |
+| 4 | Planície Cinza | Tanque Raso | Galões e destino no alto | 3 | 50% | 30% |
+| 5 | Cratera Rubra | Sopro | Gêiseres | 3 | 100% | 30% |
+| 6 | Cratera Rubra | Chuva de Pedra | Meteoros | 3 | 100% | 25% |
+| 7 | Cratera Rubra | Panela de Pressão | Gêiseres + meteoros, cristal no cânion | 4 | 95% | 30% |
+| 8 | Caverna Gélida | Compasso | Lasers em corredor | 3 | 100% | 25% |
+| 9 | Caverna Gélida | Alvo Inquieto | Base móvel e estalactite | 4 | 100% | 25% |
+| 10 | Caverna Gélida | Pouso Crítico | Gêiser, laser, meteoro, base móvel e galões | 5 | 80% | 25% |
 
 Total: **10 fases, 30 estrelas e 31 cristais**. Pousar libera a próxima fase. Estrelas liberam apenas naves.
 
@@ -265,24 +265,17 @@ Todos os menus funcionam com as três formas de entrada.
 ```ts
 interface SaveData {
   schemaVersion: 1;
-  unlockedLevel: number;
   selectedShip: ShipId;
   levels: Record<string, {
     levelVersion: number;
     stars: { landing: boolean; crystals: boolean; fuel: boolean };
     bestTimeMs?: number;
     bestFuelPct?: number;
-    ghost?: { ship: ShipId; timeMs: number; samples: string }; // Base64
   }>;
-  options: {
-    music: number;
-    sfx: number;
-    shake: boolean;
-    flashes: boolean;
-    showGhost: boolean;
-  };
 }
 ```
+
+As fases liberadas e o total de estrelas são deduzidos de `levels`, para não haver dois dados que possam discordar. O fantasma entra no formato em M7 e as opções em M8 e M9. Um save ilegível é copiado para `pouso-critico-save-backup` antes de ser substituído. Só contam voos da campanha, com fase e nave liberadas e valores padrão.
 
 O save fica no `localStorage`. Dados ausentes ou corrompidos não podem impedir o jogo de abrir. Se a gravação falhar, o jogo segue em memória e avisa.
 
@@ -461,8 +454,10 @@ Nenhum impede o início do desenvolvimento.
 
 ## 14. Próximo passo
 
-**Situação em 22/11/2026:** M0 a M4 implementadas, com a regra das duas bases. A fase 1 é jogável da decolagem ao resultado, com cristal, estrelas e recordes da sessão; as fases de teste do painel exercitam galões, meteoros, gêiseres, lasers e base móvel. O reinício automático leva 0,4 s. Continuam pendentes o ajuste fino das naves por quem joga e o teste em um celular real, previsto na seção 11.
+**Situação em 22/11/2026:** M0 a M5 implementadas. A campanha está completa, com título, seleção de fase e de nave, pausa, resultado e progresso salvo no navegador. M5 está no branch `m5-campanha`, aguardando o teste de quem joga para entrar na `main`.
 
-Próxima etapa: **M5**, com as 10 fases, seleção de fases e naves e progresso salvo em disco. Nessa etapa, voos com valores alterados no painel não devem contar.
+Pendências: avaliar a dificuldade das dez fases jogando, o ajuste fino das naves e o teste em um celular real.
 
-Para testar: `npm run dev`. Valores ajustados no painel devem ser levados para `src/data/physics.ts` e `src/data/ships.ts`.
+Próxima etapa: **M6**, com toque, gamepad e layout responsivo.
+
+Para testar: `npm run dev`. A tecla T, durante o jogo, abre o painel de ajustes e as fases de teste. Valores escolhidos no painel devem ser levados para `src/data/physics.ts` e `src/data/ships.ts`.
