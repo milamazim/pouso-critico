@@ -8,6 +8,7 @@ import { TEST_LEVELS } from './data/testLevels';
 import { TuningPanel } from './debug/tuningPanel';
 import { currentDevice, setDevice } from './input/device';
 import { GamepadInput, type PadAction } from './input/gamepad';
+import { loadFont } from './font/load';
 import { Keyboard } from './input/keyboard';
 import { TouchControls } from './input/touch';
 import { Hud } from './render/hud';
@@ -383,6 +384,7 @@ if (window.matchMedia('(pointer: coarse)').matches) setDevice('touch');
 
 panel.render(shipIndex, levelIndex);
 fitStage(el('stage'), el('viewport'));
+void loadFont();
 openTitle();
 
 startLoop({
