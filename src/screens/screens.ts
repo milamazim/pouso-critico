@@ -1,7 +1,7 @@
 import { makeHint } from '../input/device';
-import { SHIP_SIZE } from '../data/physics';
-import { SHIP_ART } from '../data/shipArt';
+import { SHIP_ART } from '../data/sprites';
 import { fmtTime, starLine } from '../render/format';
+import { spriteCanvas } from '../render/sprites';
 import { isLevelUnlocked, isShipUnlocked, nextLevelIndex, totalStars, type Records } from '../sim/campaign';
 import type { Level } from '../sim/level';
 import { countStars, NO_STARS, type Stars } from '../sim/stars';
@@ -90,15 +90,10 @@ export function showLevels(
 
 function shipPicture(id: ShipId): HTMLCanvasElement {
   const canvas = make('canvas', 'ship-picture');
-  canvas.width = SHIP_SIZE;
-  canvas.height = SHIP_SIZE;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    for (const [color, x, y, w, h] of SHIP_ART[id].rects) {
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, w, h);
-    }
-  }
+  const sprite = spriteCanvas(SHIP_ART[id]);
+  canvas.width = sprite.width;
+  canvas.height = sprite.height;
+  canvas.getContext('2d')?.drawImage(sprite, 0, 0);
   return canvas;
 }
 

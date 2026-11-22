@@ -1,5 +1,5 @@
 import { SHIP_SIZE } from '../data/physics';
-import { SHIP_ART } from '../data/shipArt';
+import { SHIP_ART } from '../data/sprites';
 import type { ShipId } from './types';
 
 /** Forma de colisão, em pixels locais (0–15), extraída do próprio desenho. */
@@ -11,13 +11,8 @@ export interface Hull {
 }
 
 function buildHull(id: ShipId): Hull {
-  const solid = new Set<number>();
-  for (const [, x, y, w, h] of SHIP_ART[id].rects) {
-    for (let j = y; j < y + h; j++) {
-      for (let i = x; i < x + w; i++) solid.add(j * SHIP_SIZE + i);
-    }
-  }
-  const pixels = [...solid].map((k) => ({ x: k % SHIP_SIZE, y: Math.floor(k / SHIP_SIZE) }));
+  const { rows, palette } = SHIP_ART[id];
+  const pixels = rows.flatMap((row, y) => [...row].flatMap((char, x) => (palette[char] ? [{ x, y }] : [])));
   const feet = pixels.filter((p) => p.y === SHIP_SIZE - 1).map((p) => p.x);
   return { pixels, feetLeft: Math.min(...feet), feetRight: Math.max(...feet) + 1 };
 }
