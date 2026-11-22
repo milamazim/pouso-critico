@@ -49,7 +49,7 @@ export const LEVELS: readonly Level[] = [
     name: 'Entre Picos',
     world: 'plain',
     startFuelPct: 100,
-    fuelGoalPct: 20,
+    fuelGoalPct: 10,
     terrain: [
       pts(
         [0, 270], [0, 206], [24, 222], [96, 222], [130, 190], [168, 150], [206, 190],
@@ -69,7 +69,7 @@ export const LEVELS: readonly Level[] = [
     name: 'Tanque Raso',
     world: 'plain',
     startFuelPct: 50,
-    fuelGoalPct: 30,
+    fuelGoalPct: 25,
     // Destino no alto; os galões ficam na subida.
     terrain: [
       pts(
@@ -137,7 +137,7 @@ export const LEVELS: readonly Level[] = [
     name: 'Panela de Pressão',
     world: 'crater',
     startFuelPct: 95,
-    fuelGoalPct: 30,
+    fuelGoalPct: 15,
     // Dois picos com um cânion entre eles; um cristal fica lá dentro.
     terrain: [
       pts(
@@ -188,7 +188,7 @@ export const LEVELS: readonly Level[] = [
     name: 'Alvo Inquieto',
     world: 'cave',
     startFuelPct: 100,
-    fuelGoalPct: 25,
+    fuelGoalPct: 15,
     terrain: [
       pts(
         [0, 270], [0, 204], [20, 222], [92, 222], [120, 196], [160, 174], [200, 194],

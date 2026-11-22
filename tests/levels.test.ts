@@ -144,10 +144,9 @@ describe('fases', () => {
   describe.each(LEVELS.map((l) => [l.name, l] as const))('campanha: %s', (_, level) => {
     const [starter] = SHIPS;
 
-    it('dá as três estrelas com a nave inicial', () => {
-      // As estrelas se acumulam entre tentativas: um voo direto e outro pelos cristais.
-      expect(canFly(level, starter!, 'direct', (r) => r.stars.fuel)).toBe(true);
-      expect(canFly(level, starter!, 'crystals', (r) => r.stars.crystals)).toBe(true);
+    it('dá as três estrelas num único voo com a nave inicial, com folga', () => {
+      // O piloto é cauteloso; ainda assim precisa sobrar 5% além da meta.
+      expect(canFly(level, starter!, 'crystals', (r) => r.stars.crystals && r.fuelPct >= level.fuelGoalPct + 5)).toBe(true);
     });
 
     it.each(SHIPS.map((s) => [s.name, s] as const))('pode ser concluída com todos os cristais com %s', (_ship, ship) => {
