@@ -67,6 +67,10 @@ body { display: flex; overflow: hidden; background: #05060f; color: #d9dcec; fon
 .track { height: calc(var(--px) * 4); background: #0b0e20; }
 .fill { display: block; height: 100%; background: #3fb6c9; }
 
+.option { display: grid; grid-template-columns: 7em auto 4em auto; align-items: center; gap: calc(var(--fp) * 6); text-align: left; }
+.option .value { text-align: center; }
+.option .step { min-width: calc(var(--fp) * 24); min-height: calc(var(--fp) * 20); }
+
 #panel { width: 250px; padding: 12px; overflow-y: auto; background: #12162c; border-left: 1px solid #2a3157; }
 #panel h2 { margin: 12px 0 4px; font-size: 13px; color: #9aa3cc; }
 #panel label { display: grid; grid-template-columns: 1fr auto; margin-bottom: 6px; }
@@ -92,7 +96,7 @@ button[aria-pressed='true'] { background: #23616d; border-color: #3fb6c9; }
 .touch-right .touch-pad { width: 96px; }
 .touch-pad.active { background: rgb(63 182 201 / 70%); }
 .touch-icon { width: 48px; height: 48px; padding: 0; border-color: rgb(217 220 236 / 40%); background: rgb(28 34 69 / 45%); font-size: 18px; touch-action: manipulation; }
-[data-device='touch'] :is(.row button, .menu .big) { min-height: 48px; touch-action: manipulation; }
+[data-device='touch'] :is(.row button, .menu .big, .option .step) { min-height: 48px; touch-action: manipulation; }
 [data-device='touch'] #viewport { touch-action: none; }
 [data-device='touch'] .menu { touch-action: pan-y; }
 

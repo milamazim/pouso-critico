@@ -75,7 +75,7 @@ describe('arquivo TrueType', () => {
 });
 
 describe('fontPixel', () => {
-  it.each([[1, 1, 1], [2, 1, 2], [3, 1, 2], [4, 1, 3], [2.78, 2, 2], [4.33, 3, 3]])('escala %f em dpr %i usa %i', (s, d, px) => {
+  it.each([[1, 1, 1], [2, 1, 2], [3, 1, 2], [4, 1, 3], [2.78, 2, 3], [4.33, 3, 4]])('escala %f em dpr %i usa %i', (s, d, px) => {
     expect(fontPixel(s, d)).toBe(px);
   });
 });

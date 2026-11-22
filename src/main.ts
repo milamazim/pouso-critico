@@ -1,8 +1,9 @@
 import './style.css';
+import { GameAudio, MAX_VOLUME } from './audio/audio';
 import { DT } from './core/fixedStep';
 import { startLoop } from './core/loop';
 import { LEVELS } from './data/levels';
-import { DEFAULT_PHYSICS, SCREEN_H, SCREEN_W, SHIP_SIZE } from './data/physics';
+import { DEFAULT_PHYSICS, LOW_FUEL, SCREEN_H, SCREEN_W, SHIP_SIZE } from './data/physics';
 import { SHIPS } from './data/ships';
 import { CRYSTAL_COLOR, FUEL_COLOR } from './data/sprites';
 import { TEST_LEVELS } from './data/testLevels';
@@ -20,13 +21,13 @@ import { drawScene } from './render/scene';
 import { fitStage } from './render/stage';
 import { Menu } from './screens/menu';
 import { ResultScreen } from './screens/result';
-import { showLevels, showPause, showShips, showTitle } from './screens/screens';
+import { showLevels, showOptions, showPause, showShips, showTitle } from './screens/screens';
 import { Attempt, type SimEvent } from './sim/attempt';
 import { isLevelUnlocked, isShipUnlocked, totalStars } from './sim/campaign';
 import { GhostPlayer } from './sim/ghost';
-import { recordLanding, type LandingResult, type RecordUpdate } from './sim/stars';
-import type { Commands, ShipSpec } from './sim/types';
-import { emptySave, loadSave, writeSave } from './storage/save';
+import { countStars, recordLanding, type LandingResult, type RecordUpdate } from './sim/stars';
+import { NO_COMMANDS, type Commands, type ShipSpec } from './sim/types';
+import { eraseProgress, loadSave, writeSave } from './storage/save';
 
 function el<T extends HTMLElement>(id: string): T {
   const found = document.getElementById(id);
@@ -56,13 +57,18 @@ const levels = [...LEVELS, ...TEST_LEVELS];
 let levelIndex = 0;
 
 /** Só em `game` a simulação avança. */
-let screen: 'title' | 'levels' | 'ships' | 'game' | 'pause' = 'title';
+let screen: 'title' | 'levels' | 'ships' | 'game' | 'pause' | 'options' = 'title';
+/** As opções foram abertas a partir da pausa. */
+let optionsInGame = false;
 /** Tempo em que o gamepad não sai da tela de resultado, em ms. */
 const RESULT_GUARD = 600;
 let resultShownAt = 0;
 
 /** Valores foram alterados no painel durante este voo. */
 let tuned = false;
+
+const audio = new GameAudio();
+audio.setVolumes(save.music, save.sfx);
 
 const particles = new Particles();
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -76,7 +82,7 @@ let backdrop = createBackdrop(sim.mask, sim.level.world);
 const hud = new Hud(el('stage'));
 const result = new ResultScreen(el('stage'), { onReplay: restart, onLevels: openLevels });
 // Antes do teclado do jogo, para poder consumir as teclas do menu aberto.
-const menu = new Menu(el('stage'));
+const menu = new Menu(el('stage'), { move: () => audio.move(), select: () => audio.select() });
 const panel = new TuningPanel(el('panel'), {
   levels,
   ships,
@@ -132,6 +138,7 @@ function readGamepads(): readonly (Gamepad | null)[] {
 }
 
 function onPadPress(action: PadAction): void {
+  audio.unlock();
   if (rotated()) return;
   if (menu.isOpen) {
     if (action === 'a') menu.activate();
@@ -176,6 +183,26 @@ function openTitle(): void {
     stars: totalStars(LEVELS, save.levels),
     maxStars: LEVELS.length * 3,
     onPlay: openLevels,
+    onOptions: () => openOptions(false),
+  });
+}
+
+function openOptions(inGame: boolean): void {
+  screen = 'options';
+  optionsInGame = inGame;
+  const change = (music: number, sfx: number): void => {
+    save.music = music;
+    save.sfx = sfx;
+    audio.setVolumes(music, sfx);
+    writeSave(getStore, save);
+  };
+  showOptions(menu, {
+    music: save.music,
+    sfx: save.sfx,
+    max: MAX_VOLUME,
+    onMusic: (v) => change(v, save.sfx),
+    onSfx: (v) => change(save.music, v),
+    onBack: inGame ? openPause : openTitle,
   });
 }
 
@@ -188,7 +215,7 @@ function openLevels(): void {
     onPick: openShips,
     onBack: openTitle,
     onErase: () => {
-      save = emptySave();
+      save = eraseProgress(save);
       shipIndex = 0;
       writeSave(getStore, save);
       openLevels();
@@ -217,6 +244,7 @@ function openPause(): void {
   showPause(menu, {
     ghost: save.showGhost,
     onGhost: toggleGhost,
+    onOptions: () => openOptions(true),
     onResume: resume,
     onRestart: () => {
       resume();
@@ -310,16 +338,20 @@ function onEvent(event: SimEvent): void {
   const { x, y } = sim.ship;
   switch (event.type) {
     case 'crystal':
+      audio.crystal();
       particles.sparkle(event.x, event.y, CRYSTAL_COLOR);
       break;
     case 'fuel':
+      audio.fuel();
       particles.sparkle(event.x, event.y, FUEL_COLOR);
       break;
     case 'crash':
+      audio.explosion();
       particles.explode(x, y, event.vx, event.vy);
       if (!reducedMotion.matches) shake = 4;
       break;
     case 'landed':
+      audio.landing(countStars(event.result.stars));
       particles.dust(x, y + SHIP_SIZE / 2);
       showResult(event, event.result);
       break;
@@ -356,6 +388,17 @@ function showResult(touch: { vx: number; vy: number }, landing: LandingResult): 
 
 // ---------------------------------------------------------------- início
 
+/** Sons contínuos acompanham o estado do jogo, quadro a quadro. */
+function updateAudio(): void {
+  const inLevel = screen === 'game' || screen === 'pause' || (screen === 'options' && optionsInGame);
+  audio.play(inLevel ? sim.level.world : 'menu');
+  audio.setDucked(inLevel && screen !== 'game');
+  const flying = screen === 'game' && sim.phase === 'flying' && !rotated();
+  audio.engines(flying ? sim.ship.engines : NO_COMMANDS);
+  const ratio = sim.fuelPct / 100 / LOW_FUEL;
+  audio.lowFuel(flying && ratio <= 1, ratio);
+}
+
 function onLeave(): void {
   clearInput();
   if (screen === 'game' && sim.phase === 'flying') openPause();
@@ -363,6 +406,7 @@ function onLeave(): void {
 
 window.addEventListener('blur', onLeave);
 document.addEventListener('visibilitychange', () => {
+  audio.setHidden(document.hidden);
   if (document.hidden) onLeave();
 });
 
@@ -378,6 +422,10 @@ portrait.addEventListener('change', () => {
   if (rotated()) onLeave();
 });
 
+// O navegador só libera o som depois de um gesto.
+for (const type of ['pointerdown', 'pointerup', 'keydown'] as const) {
+  window.addEventListener(type, () => audio.unlock(), true);
+}
 window.addEventListener('keydown', () => setDevice('keyboard'), true);
 window.addEventListener('pointerdown', (e) => {
   if (e.pointerType === 'touch') setDevice('touch');
@@ -392,6 +440,7 @@ openTitle();
 startLoop({
   frame: () => {
     gamepad.poll();
+    updateAudio();
     rotateNotice.hidden = !rotated();
     touch.visible = screen === 'game' && sim.phase !== 'landed' && currentDevice() === 'touch' && !rotated();
   },

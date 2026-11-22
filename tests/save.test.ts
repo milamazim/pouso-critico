@@ -5,7 +5,7 @@ import { isLevelUnlocked, isShipUnlocked, nextLevelIndex, totalStars } from '../
 import type { Level } from '../src/sim/level';
 import type { LevelRecord } from '../src/sim/stars';
 import {
-  BACKUP_KEY, emptySave, loadSave, parseSave, SAVE_KEY, serializeSave, writeSave, type Store,
+  BACKUP_KEY, emptySave, eraseProgress, loadSave, parseSave, SAVE_KEY, serializeSave, writeSave, type Store,
 } from '../src/storage/save';
 
 const record: LevelRecord = {
@@ -66,6 +66,19 @@ describe('save', () => {
     const blocked = (): Store => { throw new Error('bloqueado'); };
     expect(loadSave(blocked)).toEqual(emptySave());
     expect(writeSave(blocked, emptySave())).toBe(false);
+  });
+
+  it('volumes fora da faixa voltam ao padrão, e saves antigos os recebem', () => {
+    const parse = (extra: object) => parseSave(JSON.stringify({ schemaVersion: 1, levels: {}, ...extra }))!;
+    expect(parse({})).toMatchObject({ music: 6, sfx: 8 });
+    expect(parse({ music: 0, sfx: 10 })).toMatchObject({ music: 0, sfx: 10 });
+    expect(parse({ music: 99, sfx: 'alto' })).toMatchObject({ music: 6, sfx: 8 });
+  });
+
+  it('apagar o progresso preserva as opções', () => {
+    const save = { ...emptySave(), music: 1, sfx: 2, showGhost: false, selectedShip: 'besouro' as const };
+    save.levels.set('plain-1', record);
+    expect(eraseProgress(save)).toEqual({ ...emptySave(), music: 1, sfx: 2, showGhost: false });
   });
 
   it('registra a versão do formato', () => {

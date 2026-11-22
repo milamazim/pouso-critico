@@ -13,9 +13,9 @@ export function chooseScale(width: number, height: number): number {
   return whole / raw >= MIN_USE ? whole : raw;
 }
 
-/** Lado de um pixel da fonte, em pixels físicos inteiros e nunca menor que 1 px CSS. */
+/** Lado de um pixel da fonte, em pixels físicos inteiros; em telas densas, maior, para ler no celular. */
 export function fontPixel(scale: number, dpr: number): number {
-  return Math.max(Math.round(dpr), Math.round(scale * 0.8));
+  return Math.max(Math.round(dpr * 1.25), Math.round(scale * 0.8));
 }
 
 /** Ajusta o palco ao espaço disponível. */
