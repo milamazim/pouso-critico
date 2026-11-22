@@ -1,6 +1,6 @@
 import { DT } from '../core/fixedStep';
 import { SCREEN_H, SCREEN_W, SHIP_SIZE } from '../data/physics';
-import { geyserAcceleration, goalAt, goalVelocity, hitsPixel } from './hazards';
+import { geyserAcceleration, goalAt, goalVelocity, hitsPixel, isActive } from './hazards';
 import { HULLS } from './hull';
 import { FUEL_CAN, ITEM_SIZE, PAD_HEIGHT, type Level, type Pad, type Point } from './level';
 import { stepShip } from './ship';
@@ -159,7 +159,7 @@ export class Attempt {
     const { pixels } = HULLS[this.spec.id];
 
     for (const h of hazards) {
-      if (h.type === 'geyser') continue;
+      if (h.type === 'geyser' || !isActive(h, this.time)) continue;
       if (pixels.some((p) => hitsPixel(h, this.time, left + p.x, top + p.y))) {
         this.crash(h.type);
         return;

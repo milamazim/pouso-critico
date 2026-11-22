@@ -8,6 +8,7 @@ import { activeDuration, hitsPixel, WARNING } from '../src/sim/hazards';
 import { ITEM_SIZE, MAX_GOAL_SPEED, PAD_HEIGHT, type Level, type Point } from '../src/sim/level';
 import { TerrainMask } from '../src/sim/terrain';
 import { fly, onPad } from './pilot';
+import { canFly } from './routes';
 
 const HALF = SHIP_SIZE / 2;
 const ALL = [...LEVELS, ...TEST_LEVELS];
@@ -140,11 +141,22 @@ describe('fases', () => {
     });
   });
 
-  it.each(SHIPS.map((s) => [s.name, s] as const))('a fase 1 dá três estrelas com %s', (_, ship) => {
-    const sim = new Attempt(LEVELS[0]!, { ...ship }, { ...DEFAULT_PHYSICS });
-    fly(sim, [{ x: 112, y: 118 }, { x: 240, y: 118 }], 45);
-    expect(sim.phase).toBe('landed');
-    // Este piloto é lento e cauteloso, então a meta fica ao alcance de quem está aprendendo.
-    expect(sim.lastOutcome).toMatchObject({ result: { stars: { landing: true, crystals: true, fuel: true } } });
+  describe.each(LEVELS.map((l) => [l.name, l] as const))('campanha: %s', (_, level) => {
+    const [starter] = SHIPS;
+
+    it('dá as três estrelas com a nave inicial', () => {
+      // As estrelas se acumulam entre tentativas: um voo direto e outro pelos cristais.
+      expect(canFly(level, starter!, 'direct', (r) => r.stars.fuel)).toBe(true);
+      expect(canFly(level, starter!, 'crystals', (r) => r.stars.crystals)).toBe(true);
+    });
+
+    it.each(SHIPS.map((s) => [s.name, s] as const))('pode ser concluída com todos os cristais com %s', (_ship, ship) => {
+      expect(canFly(level, ship, 'crystals', (r) => r.stars.crystals)).toBe(true);
+    });
+  });
+
+  it('a campanha tem 10 fases, 30 estrelas e 31 cristais', () => {
+    expect(LEVELS).toHaveLength(10);
+    expect(LEVELS.reduce((n, l) => n + l.crystals.length, 0)).toBe(31);
   });
 });
