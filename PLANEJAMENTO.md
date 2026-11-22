@@ -470,7 +470,7 @@ Pendências, que dependem de pessoas ou aparelhos:
 
 - celular real, incluindo Safari, e gamepad real;
 - ouvir as músicas e os efeitos;
-- avaliar as novas metas de economia: as fases 9 e 10 já foram aprovadas por quem joga, mas a regra das estrelas mudou depois.
+- testar o balanceamento com o Besouro e a Libélula. A campanha completa com a Vaga-lume, nas 30 estrelas, já foi concluída e aprovada por quem joga.
 
 Antes de publicar: nome, hospedagem e licença (seção 13).
 
