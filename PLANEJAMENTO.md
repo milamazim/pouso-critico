@@ -457,7 +457,7 @@ Nenhum impede o início do desenvolvimento.
 | Questão | Proposta atual | Decidir até |
 |---|---|---|
 | Nome final e disponibilidade | Decidido: **Pouso Crítico**. Nenhum jogo com esse nome foi encontrado em busca na web, no GitHub e no npm; o INPI não foi consultado | Concluído |
-| Hospedagem | Decidida: GitHub Pages, publicado a cada envio para a `main` depois dos testes (`.github/workflows/pages.yml`) | Concluído |
+| Hospedagem | Decidida: **Vercel**, publicada a cada envio para a `main`. O build roda os testes antes (`vercel.json`), e o GitHub os roda também (`.github/workflows/testes.yml`) | Concluído |
 | Licença do código | Decidida: **MIT**, autoria de Camila Marques | Concluído |
 | Jogo instalável e offline (PWA) | Fora do MVP | Depois do MVP |
 | Uso de Git | Decidido: um branch por etapa, commits pequenos com testes passando; no fim, depois do teste de quem joga, o branch entra na `main` e recebe uma marca (`m4`, `m5`...). Repositório público no GitHub | Concluído |
@@ -470,6 +470,6 @@ Aprovados por quem joga: campanha completa com a Vaga-lume, balanceamento das tr
 
 Pendência: testar no Safari, em iPhone, iPad ou Mac.
 
-Código em https://github.com/milamazim/pouso-critico e jogo em https://milamazim.github.io/pouso-critico/.
+Código em https://github.com/milamazim/pouso-critico e jogo em https://pouso-critico.vercel.app/. O progresso fica no navegador, por endereço.
 
 Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. Em desenvolvimento, a tecla T abre o painel de ajustes e as fases de teste; na versão publicada, gerada por `npm run build`, ela não faz nada.
