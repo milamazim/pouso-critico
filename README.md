@@ -2,8 +2,6 @@
 
 Jogo de navegador no gênero de pouso lunar. Decole de uma base, desvie do cenário e pouse com suavidade na outra antes que o combustível acabe.
 
-**[Jogar agora](https://milamazim.github.io/pouso-critico/)**
-
 ![Nave entre dois picos, com um planeta ao fundo](docs/images/planicie.png)
 
 ## O jogo
