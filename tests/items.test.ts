@@ -115,7 +115,7 @@ describe('itens', () => {
 
   it('destruição não dá resultado nem estrelas', () => {
     moveTo(100, 100);
-    moveTo(-20, 100);
+    moveTo(400, 290);
     expect(sim.lastOutcome).toMatchObject({ type: 'crash' });
     expect(events.some((e) => e.type === 'landed')).toBe(false);
   });

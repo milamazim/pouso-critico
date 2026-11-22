@@ -118,9 +118,9 @@ O HUD mostra VX e VY em verde quando estão dentro da tolerância e em vermelho 
 
 - Tocar terreno, laser ligado ou meteoro
 - Tocar uma plataforma fora das condições de pouso
-- Sair mais de 16 px pelas laterais ou por baixo
+- Cair abaixo da tela
 
-No topo há um teto invisível, que zera a velocidade vertical sem destruir a nave **[P]**.
+A nave nunca sai da tela: há um teto **[P]** e paredes laterais **[D]** invisíveis, que anulam a velocidade contra a borda sem destruir a nave.
 
 A explosão dura até 0,4 s e o reinício é automático. O jogador também pode reiniciar a qualquer momento.
 

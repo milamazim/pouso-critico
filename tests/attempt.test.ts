@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { DT } from '../src/core/fixedStep';
-import { DEFAULT_PHYSICS, SHIP_SIZE } from '../src/data/physics';
+import { DEFAULT_PHYSICS, SCREEN_W, SHIP_SIZE } from '../src/data/physics';
 import { SHIPS } from '../src/data/ships';
 import { Attempt, CRASH_STEPS, type SimEvent } from '../src/sim/attempt';
 import type { Level } from '../src/sim/level';
@@ -9,6 +9,7 @@ import { NO_COMMANDS, type ShipState } from '../src/sim/types';
 const HALF = SHIP_SIZE / 2;
 const UP = { ...NO_COMMANDS, up: true };
 const RIGHT = { ...NO_COMMANDS, right: true };
+const LEFT = { ...NO_COMMANDS, left: true };
 const GRAVITY_STEP = DEFAULT_PHYSICS.gravity * DT;
 
 const level: Level = {
@@ -216,14 +217,30 @@ describe('Attempt', () => {
       }
     });
 
-    it.each([
-      ['esquerda', { x: -15, y: 100, vx: -140 }],
-      ['direita', { x: 495, y: 100, vx: 140 }],
-      ['baixo', { x: 400, y: 285, vy: 140 }],
-    ])('sai da área pela %s', (_, state) => {
-      place(state);
+    it('cair abaixo da tela encerra a tentativa', () => {
+      place({ x: 400, y: 285, vy: 140 });
       sim.step(NO_COMMANDS);
       expect(outcomes).toMatchObject([{ type: 'crash', reason: 'bounds' }]);
+    });
+
+    it.each([
+      ['esquerda', 20, -140, LEFT, RIGHT, HALF],
+      ['direita', SCREEN_W - 20, 140, RIGHT, LEFT, SCREEN_W - HALF],
+    ])('a parede %s segura a nave sem destruí-la', (_, x, vx, push, back, wall) => {
+      place({ x, y: 60, vx });
+      for (let i = 0; i < 60; i++) {
+        sim.step({ ...push, up: i % 5 < 2 });
+        // A área inteira de 16 px fica sempre dentro da tela.
+        expect(sim.ship.x).toBeGreaterThanOrEqual(HALF);
+        expect(sim.ship.x).toBeLessThanOrEqual(SCREEN_W - HALF);
+      }
+      expect(sim.ship.x).toBe(wall);
+      expect(sim.ship.vx).toBe(0);
+      expect(sim.phase).toBe('flying');
+      expect(outcomes).toHaveLength(0);
+      // Sai da parede na hora, sem velocidade acumulada contra ela.
+      sim.step(back);
+      expect(sim.ship.x).not.toBe(wall);
     });
 
     it('para no teto invisível sem destruir a nave', () => {
