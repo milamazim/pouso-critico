@@ -16,6 +16,12 @@ body { display: flex; overflow: hidden; background: #05060f; color: #d9dcec; fon
 .hud {
   position: absolute; inset: 0 0 auto; display: flex; flex-wrap: wrap;
   gap: 0 calc(var(--fp) * 12); padding: calc(var(--px) * 3) calc(var(--px) * 6); pointer-events: none;
+  /* Contorno escuro de um pixel da fonte, para ler também sobre o teto das cavernas. */
+  --o: var(--fp);
+  --n: calc(var(--fp) * -1);
+  text-shadow:
+    var(--o) 0 #05060f, var(--n) 0 #05060f, 0 var(--o) #05060f, 0 var(--n) #05060f,
+    var(--o) var(--o) #05060f, var(--n) var(--o) #05060f, var(--o) var(--n) #05060f, var(--n) var(--n) #05060f;
 }
 .ok { color: #6fe08a; }
 .bad { color: #ff6b6b; }
