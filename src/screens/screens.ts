@@ -34,7 +34,7 @@ function starRow(stars: Stars): HTMLElement {
     if (stars[key]) earned.push(names[key]);
   }
   row.setAttribute('role', 'img');
-  row.setAttribute('aria-label', earned.length > 0 ? `Estrelas: ${earned.join(', ')}` : 'Sem estrelas');
+  row.setAttribute('aria-label', earned.length > 0 ? `Melhor voo: ${earned.join(', ')}` : 'Sem estrelas');
   return row;
 }
 

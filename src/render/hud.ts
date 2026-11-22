@@ -1,9 +1,9 @@
 import { currentDevice, HINTS } from '../input/device';
 import { LOW_FUEL } from '../data/physics';
 import type { Attempt, Outcome } from '../sim/attempt';
-import type { LevelRecord } from '../sim/stars';
+import { countStars, type LevelRecord } from '../sim/stars';
 import type { ShipSpec } from '../sim/types';
-import { fmt, fmtPct, starBox } from './format';
+import { fmt, fmtPct, starLine } from './format';
 
 function set(el: HTMLElement, text: string, cls: string): void {
   if (el.textContent !== text) el.textContent = text;
@@ -95,8 +95,8 @@ export class Hud {
           `${level.name} · ${spec.name}`,
           ...(learning ? [HINTS[currentDevice()].fly, 'pouse na base amarela'] : []),
           ...(learning && level.goal.motion ? ['base móvel: pouse com "VX rel" verde'] : []),
-          `${starBox(stars?.landing)} pouso ${starBox(stars?.crystals)} ${n} ${n === 1 ? 'cristal' : 'cristais'} ` +
-            `${starBox(stars?.fuel)} ${level.fuelGoalPct}% comb.`,
+          ...(stars ? [`melhor voo: ${starLine(countStars(stars)).join('')}`] : []),
+          `★★★ pouso + ${n} ${n === 1 ? 'cristal' : 'cristais'} + ${level.fuelGoalPct}% comb.`,
           ...(ghostText ? [ghostText + HINTS[currentDevice()].ghost] : []),
         ].join('\n');
       }

@@ -26,17 +26,36 @@ describe('evaluateStars', () => {
 });
 
 describe('recordLanding', () => {
-  it('acumula estrelas de tentativas diferentes', () => {
-    const first = recordLanding(undefined, level, landing(2, 10));
-    expect(first.newStars).toEqual({ landing: true, crystals: true, fuel: false });
-    const second = recordLanding(first.record, level, landing(0, 50));
-    expect(second.newStars).toEqual({ landing: false, crystals: false, fuel: true });
-    expect(countStars(second.record.stars)).toBe(3);
+  it('não soma conquistas de voos diferentes', () => {
+    const crystals = recordLanding(undefined, level, landing(2, 10));
+    expect(countStars(crystals.record.stars)).toBe(2);
+    const fuel = recordLanding(crystals.record, level, landing(0, 50));
+    expect(countStars(fuel.record.stars)).toBe(2);
+    // No empate, fica o voo anterior.
+    expect(fuel.record.stars).toEqual({ landing: true, crystals: true, fuel: false });
+    expect(fuel.newStars).toBe(false);
   });
 
-  it('nunca perde estrela em um voo pior', () => {
-    const full = recordLanding(undefined, level, landing(2, 80)).record;
-    expect(countStars(recordLanding(full, level, landing(0, 1)).record.stars)).toBe(3);
+  it('três estrelas exigem tudo no mesmo voo', () => {
+    let record = recordLanding(undefined, level, landing(0, 10)).record;
+    for (const [c, f, stars] of [[1, 10, 1], [2, 39.9, 2], [1, 90, 2], [2, 40, 3]] as const) {
+      const update = recordLanding(record, level, landing(c, f));
+      expect(countStars(update.record.stars)).toBe(stars);
+      record = update.record;
+    }
+  });
+
+  it('fica com o melhor voo, e um pior não tira estrelas', () => {
+    const full = recordLanding(undefined, level, landing(2, 80));
+    expect(full).toMatchObject({ firstLanding: true, newStars: true });
+    const worse = recordLanding(full.record, level, landing(0, 1));
+    expect(worse).toMatchObject({ firstLanding: false, newStars: false });
+    expect(countStars(worse.record.stars)).toBe(3);
+  });
+
+  it('avisa quando o voo supera o melhor anterior', () => {
+    const one = recordLanding(undefined, level, landing(0, 10)).record;
+    expect(recordLanding(one, level, landing(2, 10))).toMatchObject({ firstLanding: false, newStars: true });
   });
 
   it('guarda o menor tempo e o maior combustível, separadamente', () => {

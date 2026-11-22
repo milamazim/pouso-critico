@@ -37,16 +37,19 @@ export class ResultScreen {
     this.root.replaceChildren();
 
     this.line('h2', `Pouso concluído: ${level.name}`);
-    // Total já conquistado na fase; em voos de teste, que não somam, só o do voo.
-    const count = countStars(update ? update.record.stars : stars);
-    this.line('p', starLine(count).join(''), 'stars').setAttribute(
-      'aria-label',
-      `${count} de 3 estrelas ${update ? 'na fase' : 'neste voo'}`,
-    );
+    // Só as conquistas deste voo: três estrelas exigem tudo na mesma jogada.
+    const count = countStars(stars);
+    this.line('p', starLine(count).join(''), 'stars').setAttribute('aria-label', `${count} de 3 estrelas`);
+    if (update) {
+      const best = countStars(update.record.stars);
+      // No primeiro pouso não há marca anterior a superar.
+      if (update.newStars && !update.firstLanding) this.line('p', 'NOVO RECORDE DE ESTRELAS', 'note');
+      else if (best > count) this.line('p', `melhor voo: ${starLine(best).join('')}`, 'note');
+    }
 
-    this.goal('Pouso', 'landing', stars.landing, update);
-    this.goal(`Coleta: ${result.crystals}/${level.crystals.length}`, 'crystals', stars.crystals, update);
-    this.goal(`Economia: ${fmtPct(result.fuelPct)} (meta ${level.fuelGoalPct}%)`, 'fuel', stars.fuel, update);
+    this.goal('Pouso', stars.landing);
+    this.goal(`Coleta: ${result.crystals}/${level.crystals.length}`, stars.crystals);
+    this.goal(`Economia: ${fmtPct(result.fuelPct)} (meta ${level.fuelGoalPct}%)`, stars.fuel);
 
     let time = `Tempo ${fmtTime(result.timeMs)}`;
     let fuel = `Combustível ${fmtPct(result.fuelPct)}`;
@@ -76,11 +79,8 @@ export class ResultScreen {
     this.root.replaceChildren();
   }
 
-  private goal(text: string, key: 'landing' | 'crystals' | 'fuel', earned: boolean, update?: RecordUpdate): void {
-    let note = '';
-    if (update?.newStars[key]) note = ' · nova!';
-    else if (!earned && update?.record.stars[key]) note = ' · já conquistada antes';
-    this.line('p', `${starBox(earned)} ${text}${note}`, earned ? 'ok' : '');
+  private goal(text: string, earned: boolean): void {
+    this.line('p', `${starBox(earned)} ${text}`, earned ? 'ok' : '');
   }
 
   private line(tag: 'h2' | 'p', text: string, cls = ''): HTMLElement {

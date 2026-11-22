@@ -387,7 +387,7 @@ function showResult(touch: { vx: number; vy: number }, landing: LandingResult): 
     for (const ship of SHIPS) {
       if (!isShipUnlocked(ship, before) && isShipUnlocked(ship, after)) notes.push(`Nave liberada: ${ship.name}!`);
     }
-    if (levelIndex === LEVELS.length - 1 && update.newStars.landing) notes.push('Campanha concluída!');
+    if (levelIndex === LEVELS.length - 1 && update.firstLanding) notes.push('Campanha concluída!');
     if (!writeSave(getStore, save)) notes.push('Não foi possível salvar: o progresso vale só até fechar a página.');
   } else {
     notes.push('Voo de teste: não conta para o progresso.');

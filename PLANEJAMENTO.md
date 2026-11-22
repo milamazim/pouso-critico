@@ -168,7 +168,9 @@ A posição e o estado são **funções puras do tempo**, com período e fase de
 | Coleta | Pousar com todos os cristais coletados na mesma tentativa |
 | Economia | Pousar com percentual de combustível igual ou maior que a meta |
 
-As estrelas ficam registradas separadamente e podem ser obtidas em tentativas diferentes **[P]**. Nas fileiras, aparecem sempre em sequência, da esquerda para a direita, pela quantidade **[D]**. No resultado, a fileira mostra o total da fase **[D]**, e o texto abaixo diz quais objetivos o voo cumpriu. A meta de economia usa o percentual do tanque da nave escolhida. **Todas as 30 estrelas precisam ser possíveis com a nave inicial**, para evitar bloqueio de progresso.
+Há três conquistas possíveis, e as estrelas são **quantas delas foram alcançadas no mesmo voo [D]**. Três estrelas exigem pousar, coletar tudo e economizar na mesma jogada; conquistas de voos diferentes não se somam. Cada fase guarda o voo com mais estrelas, e é ele que conta no total e libera naves. Nas fileiras, as estrelas aparecem sempre em sequência **[D]**. O resultado mostra as estrelas daquele voo e, se o melhor voo tiver mais, também as dele.
+
+A meta de economia usa o percentual do tanque da nave escolhida. **As 3 estrelas de cada fase precisam ser possíveis num único voo com a nave inicial**, para evitar bloqueio de progresso.
 
 ### 4.4 Naves
 
@@ -198,13 +200,13 @@ Cada fase ensina ou combina poucos elementos. Em **todas**, a linha reta entre a
 |---:|---|---|---|---:|---:|---:|
 | 1 | Planície Cinza | Primeiro Toque | Decolar, passar o morro e pousar | 1 | 100% | 25% |
 | 2 | Planície Cinza | De Lado | Travessia longa: frear de lado | 2 | 100% | 25% |
-| 3 | Planície Cinza | Entre Picos | Dois picos, base estreita e cristal no vale | 3 | 100% | 20% |
-| 4 | Planície Cinza | Tanque Raso | Galões e destino no alto | 3 | 50% | 30% |
+| 3 | Planície Cinza | Entre Picos | Dois picos, base estreita e cristal no vale | 3 | 100% | 10% |
+| 4 | Planície Cinza | Tanque Raso | Galões e destino no alto | 3 | 50% | 25% |
 | 5 | Cratera Rubra | Sopro | Gêiseres | 3 | 100% | 30% |
 | 6 | Cratera Rubra | Chuva de Pedra | Meteoros | 3 | 100% | 25% |
-| 7 | Cratera Rubra | Panela de Pressão | Gêiseres + meteoros, cristal no cânion | 4 | 95% | 30% |
+| 7 | Cratera Rubra | Panela de Pressão | Gêiseres + meteoros, cristal no cânion | 4 | 95% | 15% |
 | 8 | Caverna Gélida | Compasso | Lasers em corredor | 3 | 100% | 25% |
-| 9 | Caverna Gélida | Alvo Inquieto | Base móvel e estalactite | 4 | 100% | 25% |
+| 9 | Caverna Gélida | Alvo Inquieto | Base móvel e estalactite | 4 | 100% | 15% |
 | 10 | Caverna Gélida | Pouso Crítico | Gêiser, laser, meteoro, base móvel e galões | 5 | 80% | 25% |
 
 Total: **10 fases, 30 estrelas e 31 cristais**. Pousar libera a próxima fase. Estrelas liberam apenas naves.
@@ -418,7 +420,7 @@ A referência é **algumas semanas em tempo parcial**. O principal marco de deci
 
 ### Critérios de aceite do MVP
 
-- [x] As 10 fases podem ser concluídas e as 30 estrelas obtidas com a Vaga-lume (testes automatizados; as três estrelas de uma fase podem exigir mais de um voo)
+- [x] As 10 fases podem ser concluídas e as 30 estrelas obtidas com a Vaga-lume (testes automatizados, com as três estrelas de cada fase num único voo)
 - [x] A física não muda com a taxa de atualização da tela
 - [ ] O jogo mantém 60 fps em um desktop comum e em um celular intermediário (60 fps no desktop e com a CPU 4× mais lenta; falta um celular real)
 - [x] O reinício leva menos de 0,5 s (0,4 s medido)
@@ -468,7 +470,7 @@ Pendências, que dependem de pessoas ou aparelhos:
 
 - celular real, incluindo Safari, e gamepad real;
 - ouvir as músicas e os efeitos;
-- avaliar a dificuldade, principalmente das fases 9 e 10.
+- avaliar as novas metas de economia: as fases 9 e 10 já foram aprovadas por quem joga, mas a regra das estrelas mudou depois.
 
 Antes de publicar: nome, hospedagem e licença (seção 13).
 

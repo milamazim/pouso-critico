@@ -14,4 +14,4 @@ export const starLine = (count: number, empty = '☆'): string[] =>
   Array.from({ length: 3 }, (_, i) => (i < count ? '★' : empty));
 
 /** Versão legível em letras pequenas, em que ★ e ☆ se confundem. */
-export const starBox = (earned: boolean | undefined): string => (earned ? '[★]' : '[ ]');
+export const starBox = (earned: boolean): string => (earned ? '[★]' : '[ ]');
