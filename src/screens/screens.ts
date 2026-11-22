@@ -1,3 +1,4 @@
+import { makeHint } from '../input/device';
 import { SHIP_SIZE } from '../data/physics';
 import { SHIP_ART } from '../data/shipArt';
 import { fmtTime } from '../render/format';
@@ -8,13 +9,15 @@ import type { ShipId, ShipSpec } from '../sim/types';
 import { make, makeButton, type Menu } from './menu';
 
 export function showTitle(menu: Menu, opts: { stars: number; maxStars: number; onPlay: () => void }): void {
+  const controls = make('p', 'hint');
+  controls.append(makeHint('title'));
   menu.show(
     [
       make('h1', '', 'POUSO CRÍTICO'),
       make('p', '', 'Decole, desvie e pouse com suavidade.'),
       makeButton('Jogar', opts.onPlay, 'big'),
       make('p', 'hint', `★ ${opts.stars}/${opts.maxStars}`),
-      make('p', 'hint', '↑ motor principal · ← → motores laterais · R reinicia · Esc pausa'),
+      controls,
     ],
     { label: 'Título' },
   );
@@ -78,7 +81,7 @@ export function showLevels(
   });
 
   const footer = make('div', 'row');
-  footer.append(makeButton('Voltar (Esc)', opts.onBack), erase);
+  footer.append(makeButton('Voltar', opts.onBack, '', 'back'), erase);
   menu.show(
     [make('h2', '', `Fases   ★ ${totalStars(levels, records)}/${levels.length * 3}`), grid, footer],
     { label: 'Seleção de fase', onBack: opts.onBack, focus: buttons[nextLevelIndex(levels, records)] },
@@ -145,7 +148,7 @@ export function showShips(
     row.append(b);
   }
   const footer = make('div', 'row');
-  footer.append(makeButton('Voltar (Esc)', opts.onBack));
+  footer.append(makeButton('Voltar', opts.onBack, '', 'back'));
   menu.show([make('h2', '', `${opts.levelName}: escolha a nave`), row, footer], {
     label: 'Seleção de nave',
     onBack: opts.onBack,
@@ -160,7 +163,7 @@ export function showPause(
   menu.show(
     [
       make('h2', '', 'Pausado'),
-      makeButton('Continuar (Esc)', opts.onResume, 'big'),
+      makeButton('Continuar', opts.onResume, 'big', 'back'),
       makeButton('Reiniciar', opts.onRestart, 'big'),
       makeButton('Escolher fase', opts.onLevels, 'big'),
     ],

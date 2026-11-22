@@ -6,7 +6,10 @@ import { DEFAULT_PHYSICS, SCREEN_H, SCREEN_W, SHIP_SIZE } from './data/physics';
 import { SHIPS } from './data/ships';
 import { TEST_LEVELS } from './data/testLevels';
 import { TuningPanel } from './debug/tuningPanel';
+import { currentDevice, setDevice } from './input/device';
+import { GamepadInput, type PadAction } from './input/gamepad';
 import { Keyboard } from './input/keyboard';
+import { TouchControls } from './input/touch';
 import { Hud } from './render/hud';
 import { Particles } from './render/particles';
 import { createBackdrop, CRYSTAL_COLOR, drawScene, FUEL_COLOR } from './render/scene';
@@ -17,7 +20,7 @@ import { showLevels, showPause, showShips, showTitle } from './screens/screens';
 import { Attempt, type SimEvent } from './sim/attempt';
 import { isLevelUnlocked, isShipUnlocked, totalStars } from './sim/campaign';
 import { recordLanding, type LandingResult, type RecordUpdate } from './sim/stars';
-import type { ShipSpec } from './sim/types';
+import type { Commands, ShipSpec } from './sim/types';
 import { emptySave, loadSave, writeSave } from './storage/save';
 
 function el<T extends HTMLElement>(id: string): T {
@@ -49,6 +52,10 @@ let levelIndex = 0;
 
 /** Só em `game` a simulação avança. */
 let screen: 'title' | 'levels' | 'ships' | 'game' | 'pause' = 'title';
+/** Tempo em que o gamepad não sai da tela de resultado, em ms. */
+const RESULT_GUARD = 600;
+let resultShownAt = 0;
+
 /** Valores foram alterados no painel durante este voo. */
 let tuned = false;
 
@@ -96,6 +103,59 @@ const keyboard = new Keyboard((code) => {
       break;
   }
 });
+
+const touch = new TouchControls(el('viewport'), { pause: openPause, restart });
+
+const gamepad = new GamepadInput(readGamepads, {
+  press: onPadPress,
+  activity: () => setDevice('gamepad'),
+  disconnect: onLeave,
+});
+
+function readGamepads(): readonly (Gamepad | null)[] {
+  try {
+    return navigator.getGamepads();
+  } catch {
+    // Bloqueado pela página que hospeda o jogo.
+    return [];
+  }
+}
+
+function onPadPress(action: PadAction): void {
+  if (rotated()) return;
+  if (menu.isOpen) {
+    if (action === 'a') menu.activate();
+    else if (action === 'b' || (action === 'start' && screen === 'pause')) menu.back();
+    else if (action === 'up' || action === 'down' || action === 'left' || action === 'right') menu.move(action);
+    return;
+  }
+  if (sim.phase !== 'landed') {
+    if (action === 'y') restart();
+    else if (action === 'start') openPause();
+    return;
+  }
+  // O mesmo A do motor não pode pular o resultado logo após o toque.
+  if (performance.now() - resultShownAt < RESULT_GUARD) return;
+  if (action === 'a') (nextLevel() ?? restart)();
+  else if (action === 'y') restart();
+  else if (action === 'b' || action === 'start') openLevels();
+}
+
+/** Todas as entradas valem ao mesmo tempo. */
+function sampleCommands(): Commands {
+  const all = [keyboard.sample(), touch.sample(), gamepad.sample()];
+  return {
+    up: all.some((c) => c.up),
+    left: all.some((c) => c.left),
+    right: all.some((c) => c.right),
+  };
+}
+
+function clearInput(): void {
+  keyboard.clear();
+  touch.clear();
+  gamepad.clear();
+}
 
 // ---------------------------------------------------------------- telas
 
@@ -155,7 +215,7 @@ function openPause(): void {
 
 function resume(): void {
   menu.hide();
-  keyboard.clear();
+  clearInput();
   screen = 'game';
 }
 
@@ -251,6 +311,7 @@ function showResult(touch: { vx: number; vy: number }, landing: LandingResult): 
     notes.push('Voo de teste: não conta para o progresso.');
   }
 
+  resultShownAt = performance.now();
   const onNext = nextLevel();
   result.show({
     level: sim.level, touch, result: landing, notes,
@@ -262,7 +323,7 @@ function showResult(touch: { vx: number; vy: number }, landing: LandingResult): 
 // ---------------------------------------------------------------- início
 
 function onLeave(): void {
-  keyboard.clear();
+  clearInput();
   if (screen === 'game' && sim.phase === 'flying') openPause();
 }
 
@@ -271,13 +332,36 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) onLeave();
 });
 
+// No celular o jogo é horizontal: na vertical, pausa e pede para girar.
+const portrait = window.matchMedia('(orientation: portrait)');
+const rotateNotice = el('rotate');
+
+function rotated(): boolean {
+  return currentDevice() === 'touch' && portrait.matches;
+}
+
+portrait.addEventListener('change', () => {
+  if (rotated()) onLeave();
+});
+
+window.addEventListener('keydown', () => setDevice('keyboard'), true);
+window.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch') setDevice('touch');
+}, true);
+if (window.matchMedia('(pointer: coarse)').matches) setDevice('touch');
+
 panel.render(shipIndex, levelIndex);
 fitStage(el('stage'), el('viewport'));
 openTitle();
 
 startLoop({
+  frame: () => {
+    gamepad.poll();
+    rotateNotice.hidden = !rotated();
+    touch.visible = screen === 'game' && sim.phase !== 'landed' && currentDevice() === 'touch' && !rotated();
+  },
   step: () => {
-    sim.step(keyboard.sample());
+    sim.step(sampleCommands());
     particles.step(DT);
     shake = Math.max(0, shake - 12 * DT);
   },
@@ -285,5 +369,5 @@ startLoop({
     drawScene(ctx, backdrop, sim, particles, alpha, screen === 'game' ? shake : 0);
     hud.update(sim, save.levels.get(sim.level.id));
   },
-  isPaused: () => screen !== 'game',
+  isPaused: () => screen !== 'game' || rotated(),
 });

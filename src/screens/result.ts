@@ -57,10 +57,10 @@ export class ResultScreen {
     for (const note of notes) this.line('p', note, 'note');
 
     const row = make('div', 'row');
-    if (onNext) row.append(makeButton('Próxima fase (Enter)', onNext));
+    if (onNext) row.append(makeButton('Próxima fase', onNext, '', 'next'));
     row.append(
-      makeButton(onNext ? 'Repetir (R)' : 'Repetir (Enter)', this.actions.onReplay),
-      makeButton('Fases (Esc)', this.actions.onLevels),
+      makeButton('Repetir', this.actions.onReplay, '', onNext ? 'replay' : 'next'),
+      makeButton('Fases', this.actions.onLevels, '', 'back'),
     );
     this.root.append(row);
     this.root.hidden = false;
