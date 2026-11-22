@@ -62,7 +62,8 @@ export class Hud {
     stage.append(bar, this.message);
   }
 
-  update(sim: Attempt, record: LevelRecord | undefined): void {
+  /** `ghostText` descreve o fantasma da fase; vazio se não houver. */
+  update(sim: Attempt, record: LevelRecord | undefined, ghostText: string): void {
     const { ship, spec, level } = sim;
     const low = ship.fuel / spec.tank <= LOW_FUEL;
     // A estrela some quando o combustível cai abaixo da meta de economia.
@@ -77,10 +78,10 @@ export class Hud {
     setSpeed(this.vy, 'VY', ship.vy, ship.vy <= spec.landingVy);
     set(this.crystals, `◆ ${sim.crystalCount}/${total}${all ? ' ★' : ''}`, all ? 'ok' : '');
     set(this.time, `T ${fmt(sim.time)}`, '');
-    set(this.message, this.text(sim, record), 'message');
+    set(this.message, this.text(sim, record, ghostText), 'message');
   }
 
-  private text(sim: Attempt, record: LevelRecord | undefined): string {
+  private text(sim: Attempt, record: LevelRecord | undefined, ghostText: string): string {
     const { lastOutcome, spec, level } = sim;
     const failure = crashText(lastOutcome, spec);
     switch (sim.phase) {
@@ -93,6 +94,7 @@ export class Hud {
           ...(level.goal.motion ? ['base móvel: pouse com "VX rel" verde'] : []),
           `${starBox(stars?.landing)} pousar  ${starBox(stars?.crystals)} ${n} ${n === 1 ? 'cristal' : 'cristais'}  ` +
             `${starBox(stars?.fuel)} ${level.fuelGoalPct}% de combustível`,
+          ...(ghostText ? [ghostText + HINTS[currentDevice()].ghost] : []),
         ].join('\n');
         return failure ? `${failure}\n\n${start}` : start;
       }

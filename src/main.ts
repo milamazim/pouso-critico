@@ -11,6 +11,7 @@ import { GamepadInput, type PadAction } from './input/gamepad';
 import { Keyboard } from './input/keyboard';
 import { TouchControls } from './input/touch';
 import { Hud } from './render/hud';
+import { fmtTime } from './render/format';
 import { Particles } from './render/particles';
 import { createBackdrop, CRYSTAL_COLOR, drawScene, FUEL_COLOR } from './render/scene';
 import { fitStage } from './render/stage';
@@ -19,6 +20,7 @@ import { ResultScreen } from './screens/result';
 import { showLevels, showPause, showShips, showTitle } from './screens/screens';
 import { Attempt, type SimEvent } from './sim/attempt';
 import { isLevelUnlocked, isShipUnlocked, totalStars } from './sim/campaign';
+import { GhostPlayer } from './sim/ghost';
 import { recordLanding, type LandingResult, type RecordUpdate } from './sim/stars';
 import type { Commands, ShipSpec } from './sim/types';
 import { emptySave, loadSave, writeSave } from './storage/save';
@@ -65,6 +67,8 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let shake = 0;
 
 let sim = new Attempt(levels[0]!, ships[shipIndex]!, physics, onEvent);
+/** Melhor pouso gravado da fase atual. */
+let ghost: GhostPlayer | undefined;
 let backdrop = createBackdrop(sim.mask, sim.level.world);
 const hud = new Hud(el('stage'));
 const result = new ResultScreen(el('stage'), { onReplay: restart, onLevels: openLevels });
@@ -97,6 +101,9 @@ const keyboard = new Keyboard((code) => {
       break;
     case 'KeyP':
       if (!landed) openPause();
+      break;
+    case 'KeyG':
+      toggleGhost();
       break;
     case 'KeyT':
       panel.toggle();
@@ -132,6 +139,7 @@ function onPadPress(action: PadAction): void {
   if (sim.phase !== 'landed') {
     if (action === 'y') restart();
     else if (action === 'start') openPause();
+    else if (action === 'select') toggleGhost();
     return;
   }
   // O mesmo A do motor não pode pular o resultado logo após o toque.
@@ -204,6 +212,8 @@ function openShips(index: number): void {
 function openPause(): void {
   screen = 'pause';
   showPause(menu, {
+    ghost: save.showGhost,
+    onGhost: toggleGhost,
     onResume: resume,
     onRestart: () => {
       resume();
@@ -240,6 +250,27 @@ function restart(): void {
   tuned = !hasDefaultValues();
   result.hide();
   sim.reset();
+  loadGhost();
+}
+
+function loadGhost(): void {
+  const record = save.levels.get(sim.level.id);
+  // Gravação de outra versão da fase não vale mais.
+  const recorded = record?.levelVersion === sim.level.version ? record.ghost : undefined;
+  ghost = recorded && GhostPlayer.from(recorded);
+}
+
+function ghostText(): string {
+  if (!ghost) return '';
+  if (!save.showGhost) return 'fantasma desligado';
+  const { ship, timeMs } = ghost;
+  return `fantasma: ${SHIPS.find((s) => s.id === ship)?.name ?? ship} ${fmtTime(timeMs)}`;
+}
+
+function toggleGhost(): boolean {
+  save.showGhost = !save.showGhost;
+  writeSave(getStore, save);
+  return save.showGhost;
 }
 
 function restore(): void {
@@ -298,7 +329,7 @@ function showResult(touch: { vx: number; vy: number }, landing: LandingResult): 
 
   if (flightCounts()) {
     const before = totalStars(LEVELS, save.levels);
-    update = recordLanding(save.levels.get(sim.level.id), sim.level, landing);
+    update = recordLanding(save.levels.get(sim.level.id), sim.level, landing, sim.recording());
     save.levels.set(sim.level.id, update.record);
     const after = totalStars(LEVELS, save.levels);
 
@@ -366,8 +397,8 @@ startLoop({
     shake = Math.max(0, shake - 12 * DT);
   },
   render: (alpha) => {
-    drawScene(ctx, backdrop, sim, particles, alpha, screen === 'game' ? shake : 0);
-    hud.update(sim, save.levels.get(sim.level.id));
+    drawScene(ctx, backdrop, sim, particles, alpha, screen === 'game' ? shake : 0, save.showGhost ? ghost : undefined);
+    hud.update(sim, save.levels.get(sim.level.id), ghostText());
   },
   isPaused: () => screen !== 'game' || rotated(),
 });

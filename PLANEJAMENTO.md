@@ -268,16 +268,18 @@ Todos os menus funcionam com as três formas de entrada.
 interface SaveData {
   schemaVersion: 1;
   selectedShip: ShipId;
+  showGhost: boolean;
   levels: Record<string, {
     levelVersion: number;
     stars: { landing: boolean; crystals: boolean; fuel: boolean };
     bestTimeMs?: number;
     bestFuelPct?: number;
+    ghost?: { ship: ShipId; timeMs: number; samples: string }; // Base64
   }>;
 }
 ```
 
-As fases liberadas e o total de estrelas são deduzidos de `levels`, para não haver dois dados que possam discordar. O fantasma entra no formato em M7 e as opções em M8 e M9. Um save ilegível é copiado para `pouso-critico-save-backup` antes de ser substituído. Só contam voos da campanha, com fase e nave liberadas e valores padrão.
+As fases liberadas e o total de estrelas são deduzidos de `levels`, para não haver dois dados que possam discordar. As demais opções entram em M8 e M9. Um fantasma corrompido é descartado sozinho, sem perder o resto do registro. Recordes anteriores à M7 não têm gravação e ganham uma no próximo pouso, mesmo mais lento. Um save ilegível é copiado para `pouso-critico-save-backup` antes de ser substituído. Só contam voos da campanha, com fase e nave liberadas e valores padrão.
 
 O save fica no `localStorage`. Dados ausentes ou corrompidos não podem impedir o jogo de abrir. Se a gravação falhar, o jogo segue em memória e avisa.
 
@@ -456,10 +458,10 @@ Nenhum impede o início do desenvolvimento.
 
 ## 14. Próximo passo
 
-**Situação em 22/11/2026:** M0 a M5 concluídas e na `main` (marca `m5`). M6 implementada no branch `m6-entradas`, com toque, gamepad e layout responsivo, aguardando o teste de quem joga em aparelhos reais. Até aqui, toque e gamepad só foram testados por emulação e simulação no Chrome.
+**Situação em 22/11/2026:** M0 a M5 concluídas e na `main` (marca `m5`). M6 está no branch `m6-entradas` e M7 no `m7-fantasma`, que parte dela. As duas aguardam o teste de quem joga para entrar na `main`.
 
-Pendências: celular real (incluindo Safari), gamepad real e avaliação da fase 10.
+Pendências: celular real (incluindo Safari), gamepad real e avaliação da fase 10. Toque e gamepad só foram testados por emulação e simulação no Chrome.
 
-Próxima etapa: **M7**, com gravação e reprodução do fantasma.
+Próxima etapa: **M8**, com sprites, fonte bitmap, os três mundos, efeitos sonoros e música.
 
 Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. A tecla T, durante o jogo, abre o painel de ajustes e as fases de teste.

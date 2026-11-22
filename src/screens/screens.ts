@@ -158,13 +158,26 @@ export function showShips(
 
 export function showPause(
   menu: Menu,
-  opts: { onResume: () => void; onRestart: () => void; onLevels: () => void },
+  opts: {
+    ghost: boolean;
+    onResume: () => void;
+    onRestart: () => void;
+    /** Devolve o novo estado. */
+    onGhost: () => boolean;
+    onLevels: () => void;
+  },
 ): void {
+  const label = make('span');
+  const setLabel = (on: boolean): void => { label.textContent = `Fantasma: ${on ? 'ligado' : 'desligado'}`; };
+  setLabel(opts.ghost);
+  const ghost = makeButton('', () => setLabel(opts.onGhost()), 'big');
+  ghost.append(label);
   menu.show(
     [
       make('h2', '', 'Pausado'),
       makeButton('Continuar', opts.onResume, 'big', 'back'),
       makeButton('Reiniciar', opts.onRestart, 'big'),
+      ghost,
       makeButton('Escolher fase', opts.onLevels, 'big'),
     ],
     { label: 'Pausa', onBack: opts.onResume },

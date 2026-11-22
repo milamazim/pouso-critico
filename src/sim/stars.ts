@@ -1,3 +1,4 @@
+import type { Ghost } from './ghost';
 import type { Level } from './level';
 
 export interface Stars {
@@ -32,6 +33,8 @@ export interface LevelRecord {
   readonly stars: Stars;
   readonly bestTimeMs?: number;
   readonly bestFuelPct?: number;
+  /** Pouso mais rápido entre os gravados. */
+  readonly ghost?: Ghost;
 }
 
 export interface RecordUpdate {
@@ -49,12 +52,15 @@ export function recordLanding(
   previous: LevelRecord | undefined,
   level: Level,
   result: LandingResult,
+  ghost?: Ghost,
 ): RecordUpdate {
   const had = previous?.stars ?? NO_STARS;
   // Uma nova versão da fase invalida tempo e combustível, mas preserva as estrelas.
   const same = previous?.levelVersion === level.version ? previous : undefined;
   const oldTime = same?.bestTimeMs;
   const oldFuel = same?.bestFuelPct;
+  const oldGhost = same?.ghost;
+  const bestGhost = ghost && (!oldGhost || ghost.timeMs < oldGhost.timeMs) ? ghost : oldGhost;
 
   return {
     record: {
@@ -66,6 +72,7 @@ export function recordLanding(
       },
       bestTimeMs: Math.min(oldTime ?? Infinity, result.timeMs),
       bestFuelPct: Math.max(oldFuel ?? 0, result.fuelPct),
+      ...(bestGhost && { ghost: bestGhost }),
     },
     newStars: {
       landing: result.stars.landing && !had.landing,
