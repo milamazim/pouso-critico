@@ -74,8 +74,8 @@ As decisões de projeto estão em [PLANEJAMENTO.md](PLANEJAMENTO.md).
 
 ## Situação
 
-A campanha está completa e foi concluída com as 30 estrelas usando a Vaga-lume. Ainda faltam testes em celular, Safari e gamepad reais, e o balanceamento das outras duas naves.
+A campanha está completa, foi concluída com as 30 estrelas usando a Vaga-lume e já foi jogada com teclado, em dois celulares Android e com gamepad. Ainda falta testar no Safari, em iPhone, iPad ou Mac.
 
-## Créditos e licença
+## Autoria e licença
 
-Desenvolvido com o [Claude Code](https://claude.com/claude-code). O projeto ainda não tem licença definida: o código pode ser lido, mas não há permissão para reutilizá-lo.
+Criado por Camila Marques e desenvolvido com o [Claude Code](https://claude.com/claude-code). Distribuído sob a [licença MIT](LICENSE).
