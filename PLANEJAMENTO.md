@@ -460,7 +460,7 @@ Nenhum impede o início do desenvolvimento.
 
 ## 14. Próximo passo
 
-**Situação em 22/11/2026:** M0 a M5 concluídas e na `main` (marca `m5`). M6 (`m6-entradas`), M7 (`m7-fantasma`) e M8 (`m8-arte-som`) estão implementadas em branches encadeados, cada um a partir do anterior, aguardando o teste de quem joga para entrar na `main`.
+**Situação em 22/11/2026:** M0 a M8 implementadas e na `main`, com as marcas `m4` a `m8`.
 
 Pendências: celular real (incluindo Safari), gamepad real, avaliação da fase 10 e audição das músicas e efeitos, que só foram verificados por medição do sinal.
 
