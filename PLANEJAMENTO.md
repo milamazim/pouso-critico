@@ -244,7 +244,7 @@ Título → Seleção de fase → Seleção de nave → Jogo → Resultado → p
 | HUD | Combustível, VX, VY, cristais e tempo |
 | Pausa | Continuar, reiniciar, fantasma, opções, sair |
 | Resultado | Estrelas, tempo, combustível e novo recorde |
-| Opções | Volumes, tremor de tela, flashes, fantasma, apagar progresso com confirmação |
+| Opções | Volumes de música e efeitos; tremor de tela e flashes em M9. O fantasma fica na pausa, e apagar progresso, com confirmação, na seleção de fase |
 
 Todos os menus funcionam com as três formas de entrada.
 
@@ -269,6 +269,8 @@ interface SaveData {
   schemaVersion: 1;
   selectedShip: ShipId;
   showGhost: boolean;
+  music: number; // 0 a 10
+  sfx: number; // 0 a 10
   levels: Record<string, {
     levelVersion: number;
     stars: { landing: boolean; crystals: boolean; fuel: boolean };
@@ -279,7 +281,7 @@ interface SaveData {
 }
 ```
 
-As fases liberadas e o total de estrelas são deduzidos de `levels`, para não haver dois dados que possam discordar. As demais opções entram em M8 e M9. Um fantasma corrompido é descartado sozinho, sem perder o resto do registro. Recordes anteriores à M7 não têm gravação e ganham uma no próximo pouso, mesmo mais lento. Um save ilegível é copiado para `pouso-critico-save-backup` antes de ser substituído. Só contam voos da campanha, com fase e nave liberadas e valores padrão.
+As fases liberadas e o total de estrelas são deduzidos de `levels`, para não haver dois dados que possam discordar. As opções de tremor e flashes entram em M9. Apagar o progresso preserva as opções. Um fantasma corrompido é descartado sozinho, sem perder o resto do registro. Recordes anteriores à M7 não têm gravação e ganham uma no próximo pouso, mesmo mais lento. Um save ilegível é copiado para `pouso-critico-save-backup` antes de ser substituído. Só contam voos da campanha, com fase e nave liberadas e valores padrão.
 
 O save fica no `localStorage`. Dados ausentes ou corrompidos não podem impedir o jogo de abrir. Se a gravação falhar, o jogo segue em memória e avisa.
 
@@ -291,7 +293,7 @@ O save fica no `localStorage`. Dados ausentes ou corrompidos não podem impedir 
 - Escala inteira sempre que aproveitar ao menos 75% do espaço, com suavização desligada e faixas laterais quando necessário. Senão, escala fracionária.
 - Até 16 cores por mundo, com cores constantes para nave, cristal, combustível e perigo.
 - Terreno: polígonos rasterizados com borda clara e textura determinística.
-- Fonte bitmap própria, incluindo `ÁÀÂÃÉÊÍÓÔÕÚÇ`.
+- Fonte bitmap própria, só com maiúsculas, incluindo `ÁÀÂÃÉÊÍÓÔÕÚÇ`. É montada como TrueType em tempo de execução, para que os textos continuem no HTML, acessíveis. Um teste garante que todos os símbolos das telas tenham glifo.
 - Animações curtas, de 2 a 4 quadros: chamas, cristal, meteoro, gêiser e explosão.
 
 | Mundo | Paleta | Terreno |
@@ -458,10 +460,10 @@ Nenhum impede o início do desenvolvimento.
 
 ## 14. Próximo passo
 
-**Situação em 22/11/2026:** M0 a M5 concluídas e na `main` (marca `m5`). M6 está no branch `m6-entradas` e M7 no `m7-fantasma`, que parte dela. As duas aguardam o teste de quem joga para entrar na `main`.
+**Situação em 22/11/2026:** M0 a M8 implementadas e na `main`, com as marcas `m4` a `m8`.
 
-Pendências: celular real (incluindo Safari), gamepad real e avaliação da fase 10. Toque e gamepad só foram testados por emulação e simulação no Chrome.
+Pendências: celular real (incluindo Safari), gamepad real, avaliação da fase 10 e audição das músicas e efeitos, que só foram verificados por medição do sinal.
 
-Próxima etapa: **M8**, com sprites, fonte bitmap, os três mundos, efeitos sonoros e música.
+Próxima etapa: **M9**, com balanceamento, acessibilidade e testes finais.
 
 Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. A tecla T, durante o jogo, abre o painel de ajustes e as fases de teste.

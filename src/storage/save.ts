@@ -14,13 +14,22 @@ export interface SaveData {
   /** Registros por ID de fase. As fases liberadas são deduzidas daqui. */
   levels: Map<string, LevelRecord>;
   showGhost: boolean;
+  /** Volumes de 0 a 10. */
+  music: number;
+  sfx: number;
 }
 
 /** Parte do `localStorage` usada aqui; permite testar sem navegador. */
 export type Store = Pick<Storage, 'getItem' | 'setItem'>;
 
+/** Zera a campanha e preserva as opções. */
+export function eraseProgress(save: SaveData): SaveData {
+  const { showGhost, music, sfx } = save;
+  return { ...emptySave(), showGhost, music, sfx };
+}
+
 export function emptySave(): SaveData {
-  return { selectedShip: SHIPS[0]!.id, levels: new Map(), showGhost: true };
+  return { selectedShip: SHIPS[0]!.id, levels: new Map(), showGhost: true, music: 6, sfx: 8 };
 }
 
 type Json = Record<string, unknown>;
@@ -74,6 +83,8 @@ export function parseSave(text: string): SaveData | undefined {
   const ship = SHIPS.find((s) => s.id === raw.selectedShip);
   if (ship) save.selectedShip = ship.id;
   if (typeof raw.showGhost === 'boolean') save.showGhost = raw.showGhost;
+  save.music = Math.round(numberIn(raw.music, 0, 10) ?? save.music);
+  save.sfx = Math.round(numberIn(raw.sfx, 0, 10) ?? save.sfx);
   if (isObject(raw.levels)) {
     for (const [id, value] of Object.entries(raw.levels)) {
       const record = parseRecord(value);
@@ -88,6 +99,8 @@ export function serializeSave(save: SaveData): string {
     schemaVersion: SCHEMA_VERSION,
     selectedShip: save.selectedShip,
     showGhost: save.showGhost,
+    music: save.music,
+    sfx: save.sfx,
     levels: Object.fromEntries(save.levels),
   });
 }

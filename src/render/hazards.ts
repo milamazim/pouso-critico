@@ -39,11 +39,18 @@ function drawMeteor(ctx: Ctx, m: Meteor, time: number): void {
       const r = Math.max(1, Math.round(m.radius * (size as number)));
       disc(ctx, c.x - ux * m.radius * (back as number), c.y - uy * m.radius * (back as number), r);
     });
-    ctx.fillStyle = '#8a6a5c';
-    disc(ctx, c.x, c.y, m.radius);
+    // Rocha sombreada, com crateras que giram em quatro quadros.
     ctx.fillStyle = '#5e453c';
-    ctx.fillRect(Math.round(c.x) - 2, Math.round(c.y) - 1, 2, 2);
-    ctx.fillRect(Math.round(c.x) + 1, Math.round(c.y) + 1, 2, 1);
+    disc(ctx, c.x, c.y, m.radius);
+    ctx.fillStyle = '#8a6a5c';
+    disc(ctx, c.x - 1, c.y - 1, m.radius - 1);
+    ctx.fillStyle = '#a9887a';
+    disc(ctx, c.x - 2, c.y - 2, Math.max(1, m.radius - 4));
+    ctx.fillStyle = '#4a352e';
+    const turn = Math.floor(time * 6) % 4;
+    const [ox, oy] = [[2, 1], [-1, 2], [-3, 0], [0, -3]][turn] as [number, number];
+    ctx.fillRect(Math.round(c.x) + ox, Math.round(c.y) + oy, 2, 2);
+    ctx.fillRect(Math.round(c.x) - oy - 1, Math.round(c.y) + ox - 1, 2, 1);
     return;
   }
 

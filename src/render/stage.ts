@@ -13,6 +13,11 @@ export function chooseScale(width: number, height: number): number {
   return whole / raw >= MIN_USE ? whole : raw;
 }
 
+/** Lado de um pixel da fonte, em pixels físicos inteiros; em telas densas, maior, para ler no celular. */
+export function fontPixel(scale: number, dpr: number): number {
+  return Math.max(Math.round(dpr * 1.25), Math.round(scale * 0.8));
+}
+
 /** Ajusta o palco ao espaço disponível. */
 export function fitStage(stage: HTMLElement, container: HTMLElement): void {
   const fit = (): void => {
@@ -22,6 +27,7 @@ export function fitStage(stage: HTMLElement, container: HTMLElement): void {
     stage.style.width = `${SCREEN_W * scale}px`;
     stage.style.height = `${SCREEN_H * scale}px`;
     stage.style.setProperty('--px', `${scale}px`);
+    stage.style.setProperty('--fp', `${fontPixel(scale * dpr, dpr) / dpr}px`);
   };
   new ResizeObserver(fit).observe(container);
   window.addEventListener('resize', fit);

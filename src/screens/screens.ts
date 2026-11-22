@@ -1,14 +1,14 @@
 import { makeHint } from '../input/device';
-import { SHIP_SIZE } from '../data/physics';
-import { SHIP_ART } from '../data/shipArt';
+import { SHIP_ART } from '../data/sprites';
 import { fmtTime, starLine } from '../render/format';
+import { spriteCanvas } from '../render/sprites';
 import { isLevelUnlocked, isShipUnlocked, nextLevelIndex, totalStars, type Records } from '../sim/campaign';
 import type { Level } from '../sim/level';
 import { countStars, NO_STARS, type Stars } from '../sim/stars';
 import type { ShipId, ShipSpec } from '../sim/types';
 import { make, makeButton, type Menu } from './menu';
 
-export function showTitle(menu: Menu, opts: { stars: number; maxStars: number; onPlay: () => void }): void {
+export function showTitle(menu: Menu, opts: { stars: number; maxStars: number; onPlay: () => void; onOptions: () => void }): void {
   const controls = make('p', 'hint');
   controls.append(makeHint('title'));
   menu.show(
@@ -16,6 +16,7 @@ export function showTitle(menu: Menu, opts: { stars: number; maxStars: number; o
       make('h1', '', 'POUSO CRÍTICO'),
       make('p', '', 'Decole, desvie e pouse com suavidade.'),
       makeButton('Jogar', opts.onPlay, 'big'),
+      makeButton('Opções', opts.onOptions, 'big'),
       make('p', 'hint', `★ ${opts.stars}/${opts.maxStars}`),
       controls,
     ],
@@ -90,15 +91,10 @@ export function showLevels(
 
 function shipPicture(id: ShipId): HTMLCanvasElement {
   const canvas = make('canvas', 'ship-picture');
-  canvas.width = SHIP_SIZE;
-  canvas.height = SHIP_SIZE;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    for (const [color, x, y, w, h] of SHIP_ART[id].rects) {
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, w, h);
-    }
-  }
+  const sprite = spriteCanvas(SHIP_ART[id]);
+  canvas.width = sprite.width;
+  canvas.height = sprite.height;
+  canvas.getContext('2d')?.drawImage(sprite, 0, 0);
   return canvas;
 }
 
@@ -164,6 +160,7 @@ export function showPause(
     onRestart: () => void;
     /** Devolve o novo estado. */
     onGhost: () => boolean;
+    onOptions: () => void;
     onLevels: () => void;
   },
 ): void {
@@ -178,8 +175,52 @@ export function showPause(
       makeButton('Continuar', opts.onResume, 'big', 'back'),
       makeButton('Reiniciar', opts.onRestart, 'big'),
       ghost,
+      makeButton('Opções', opts.onOptions, 'big'),
       makeButton('Escolher fase', opts.onLevels, 'big'),
     ],
     { label: 'Pausa', onBack: opts.onResume },
+  );
+}
+
+/** Linha com botões de menos e mais; as mudanças valem na hora. */
+function volumeRow(label: string, initial: number, max: number, onChange: (v: number) => void): HTMLElement {
+  let value = initial;
+  const shown = make('span', 'value');
+  const update = (delta: number): void => {
+    value = Math.max(0, Math.min(max, value + delta));
+    shown.textContent = value === 0 ? 'mudo' : `${value}/${max}`;
+    if (delta !== 0) onChange(value);
+  };
+  update(0);
+  const step = (text: string, delta: number, name: string): HTMLButtonElement => {
+    const b = makeButton(text, () => update(delta), 'step');
+    b.setAttribute('aria-label', `${label}: ${name}`);
+    return b;
+  };
+  const row = make('div', 'option');
+  row.append(make('span', 'name', label), step('-', -1, 'diminuir'), shown, step('+', 1, 'aumentar'));
+  return row;
+}
+
+export function showOptions(
+  menu: Menu,
+  opts: {
+    music: number;
+    sfx: number;
+    max: number;
+    onMusic: (v: number) => void;
+    onSfx: (v: number) => void;
+    onBack: () => void;
+  },
+): void {
+  const back = makeButton('Voltar', opts.onBack, 'big', 'back');
+  menu.show(
+    [
+      make('h2', '', 'Opções'),
+      volumeRow('Música', opts.music, opts.max, opts.onMusic),
+      volumeRow('Efeitos', opts.sfx, opts.max, opts.onSfx),
+      back,
+    ],
+    { label: 'Opções', onBack: opts.onBack },
   );
 }

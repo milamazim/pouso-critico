@@ -40,7 +40,7 @@ function crashText(outcome: Outcome | undefined, spec: ShipSpec): string {
   }
 }
 
-/** HUD provisório em DOM; a fonte bitmap chega em M8. */
+/** HUD em HTML, sobre o canvas, com a fonte do jogo. */
 export class Hud {
   private readonly fuel: HTMLElement;
   private readonly vx: HTMLElement;
@@ -88,15 +88,17 @@ export class Hud {
       case 'ready': {
         const stars = record?.stars;
         const n = level.crystals.length;
-        const start = [
+        // As instruções somem depois da primeira falha ou de um pouso, para não cobrir a fase.
+        const learning = !failure && !stars?.landing;
+        return [
+          ...(failure ? [failure] : []),
           `${level.name} · ${spec.name}`,
-          `${HINTS[currentDevice()].fly} · pouse na base amarela`,
-          ...(level.goal.motion ? ['base móvel: pouse com "VX rel" verde'] : []),
-          `${starBox(stars?.landing)} pousar  ${starBox(stars?.crystals)} ${n} ${n === 1 ? 'cristal' : 'cristais'}  ` +
-            `${starBox(stars?.fuel)} ${level.fuelGoalPct}% de combustível`,
+          ...(learning ? [HINTS[currentDevice()].fly, 'pouse na base amarela'] : []),
+          ...(learning && level.goal.motion ? ['base móvel: pouse com "VX rel" verde'] : []),
+          `${starBox(stars?.landing)} pouso ${starBox(stars?.crystals)} ${n} ${n === 1 ? 'cristal' : 'cristais'} ` +
+            `${starBox(stars?.fuel)} ${level.fuelGoalPct}% comb.`,
           ...(ghostText ? [ghostText + HINTS[currentDevice()].ghost] : []),
         ].join('\n');
-        return failure ? `${failure}\n\n${start}` : start;
       }
       case 'crashed':
         return failure;

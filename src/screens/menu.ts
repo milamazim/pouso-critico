@@ -31,8 +31,12 @@ export class Menu {
   private readonly root = make('section', 'menu');
   private onBack: (() => void) | undefined;
 
-  constructor(stage: HTMLElement) {
+  constructor(stage: HTMLElement, private readonly sound: { move: () => void; select: () => void }) {
     this.root.hidden = true;
+    // Na captura, antes que o clique troque de tela.
+    this.root.addEventListener('click', (e) => {
+      if ((e.target as Element).closest('button')) this.sound.select();
+    }, true);
     stage.append(this.root);
     window.addEventListener('keydown', (e) => this.onKey(e));
   }
@@ -119,7 +123,9 @@ export class Menu {
         best = b;
       }
     }
-    best?.focus();
+    if (!best) return;
+    best.focus();
+    this.sound.move();
   }
 }
 
