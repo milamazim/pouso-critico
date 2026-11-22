@@ -9,7 +9,9 @@ export const fmtPct = (v: number): string => `${v > 0 ? Math.max(1, Math.floor(v
 
 export const fmtTime = (ms: number): string => `${fmt(ms / 1000)} s`;
 
-export const star = (earned: boolean | undefined): string => (earned ? '★' : '☆');
+/** Três estrelas preenchidas da esquerda para a direita, sem buracos. */
+export const starLine = (count: number, empty = '☆'): string[] =>
+  Array.from({ length: 3 }, (_, i) => (i < count ? '★' : empty));
 
 /** Versão legível em letras pequenas, em que ★ e ☆ se confundem. */
 export const starBox = (earned: boolean | undefined): string => (earned ? '[★]' : '[ ]');

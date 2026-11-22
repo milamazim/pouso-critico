@@ -168,7 +168,7 @@ A posição e o estado são **funções puras do tempo**, com período e fase de
 | Coleta | Pousar com todos os cristais coletados na mesma tentativa |
 | Economia | Pousar com percentual de combustível igual ou maior que a meta |
 
-As estrelas ficam registradas separadamente e podem ser obtidas em tentativas diferentes **[P]**. A meta de economia usa o percentual do tanque da nave escolhida. **Todas as 30 estrelas precisam ser possíveis com a nave inicial**, para evitar bloqueio de progresso.
+As estrelas ficam registradas separadamente e podem ser obtidas em tentativas diferentes **[P]**. Nas fileiras, aparecem sempre em sequência, da esquerda para a direita, pela quantidade **[D]**; o texto ao lado diz quais objetivos foram cumpridos. A meta de economia usa o percentual do tanque da nave escolhida. **Todas as 30 estrelas precisam ser possíveis com a nave inicial**, para evitar bloqueio de progresso.
 
 ### 4.4 Naves
 
