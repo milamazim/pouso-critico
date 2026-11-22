@@ -1,4 +1,4 @@
-import { fmt, fmtPct, fmtTime, star, starBox } from '../render/format';
+import { fmt, fmtPct, fmtTime, starBox, starLine } from '../render/format';
 import type { Level } from '../sim/level';
 import { countStars, type LandingResult, type RecordUpdate } from '../sim/stars';
 import { make, makeButton } from './menu';
@@ -37,8 +37,12 @@ export class ResultScreen {
     this.root.replaceChildren();
 
     this.line('h2', `Pouso concluído: ${level.name}`);
-    this.line('p', star(stars.landing) + star(stars.crystals) + star(stars.fuel), 'stars')
-      .setAttribute('aria-label', `${countStars(stars)} de 3 estrelas neste voo`);
+    // Total já conquistado na fase; em voos de teste, que não somam, só o do voo.
+    const count = countStars(update ? update.record.stars : stars);
+    this.line('p', starLine(count).join(''), 'stars').setAttribute(
+      'aria-label',
+      `${count} de 3 estrelas ${update ? 'na fase' : 'neste voo'}`,
+    );
 
     this.goal('Pouso', 'landing', stars.landing, update);
     this.goal(`Coleta: ${result.crystals}/${level.crystals.length}`, 'crystals', stars.crystals, update);

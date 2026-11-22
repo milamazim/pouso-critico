@@ -1,5 +1,6 @@
 import { DT } from '../core/fixedStep';
 import { SCREEN_H, SCREEN_W, SHIP_SIZE } from '../data/physics';
+import { GhostRecorder, SAMPLE_STEPS, type Ghost } from './ghost';
 import { geyserAcceleration, goalAt, goalVelocity, hitsPixel, isActive } from './hazards';
 import { HULLS } from './hull';
 import { FUEL_CAN, ITEM_SIZE, PAD_HEIGHT, type Level, type Pad, type Point } from './level';
@@ -48,6 +49,7 @@ export class Attempt {
 
   private readonly crystalsTaken = new Set<number>();
   private readonly cansTaken = new Set<number>();
+  private readonly recorder = new GhostRecorder();
   private steps = 0;
   private crashSteps = 0;
   private waitRelease = false;
@@ -95,6 +97,12 @@ export class Attempt {
     return this.cansTaken.has(index);
   }
 
+  /** Gravação do pouso; indefinida antes dele ou se o voo foi longo demais. */
+  recording(): Ghost | undefined {
+    if (this.phase !== 'landed') return undefined;
+    return this.recorder.finish(this.spec.id, Math.round(this.time * 1000));
+  }
+
   reset(): void {
     this.crystalsTaken.clear();
     this.cansTaken.clear();
@@ -119,6 +127,8 @@ export class Attempt {
       if (!commands.up || this.waitRelease) return;
       this.phase = 'flying';
       this.lastOutcome = undefined;
+      this.recorder.clear();
+      this.recorder.add(this.ship);
     }
 
     const before = this.ship;
@@ -143,6 +153,7 @@ export class Attempt {
     this.ship = ship;
     this.collect(ship);
     this.resolve(before, ship);
+    if (this.phase === 'flying' && this.steps % SAMPLE_STEPS === 0) this.recorder.add(this.ship);
   }
 
   private collect(ship: ShipState): void {
@@ -228,6 +239,8 @@ export class Attempt {
 
   private land(vx: number): void {
     const { vy } = this.ship;
+    // Antes do evento de pouso, que já salva a gravação.
+    this.recorder.add({ ...this.ship, engines: NO_COMMANDS });
     const crystals = this.crystalCount;
     const { fuelPct } = this;
     this.finish('landed', {

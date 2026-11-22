@@ -1,4 +1,5 @@
 import { SHIPS } from '../data/ships';
+import { GhostPlayer, type Ghost } from '../sim/ghost';
 import type { LevelRecord } from '../sim/stars';
 import type { ShipId } from '../sim/types';
 
@@ -12,13 +13,14 @@ export interface SaveData {
   selectedShip: ShipId;
   /** Registros por ID de fase. As fases liberadas são deduzidas daqui. */
   levels: Map<string, LevelRecord>;
+  showGhost: boolean;
 }
 
 /** Parte do `localStorage` usada aqui; permite testar sem navegador. */
 export type Store = Pick<Storage, 'getItem' | 'setItem'>;
 
 export function emptySave(): SaveData {
-  return { selectedShip: SHIPS[0]!.id, levels: new Map() };
+  return { selectedShip: SHIPS[0]!.id, levels: new Map(), showGhost: true };
 }
 
 type Json = Record<string, unknown>;
@@ -28,6 +30,15 @@ const isObject = (v: unknown): v is Json => typeof v === 'object' && v !== null 
 const numberIn = (v: unknown, min: number, max: number): number | undefined =>
   typeof v === 'number' && v >= min && v <= max ? v : undefined;
 
+function parseGhost(v: unknown): Ghost | undefined {
+  if (!isObject(v) || typeof v.samples !== 'string') return undefined;
+  const ship = SHIPS.find((s) => s.id === v.ship);
+  const timeMs = numberIn(v.timeMs, 1, Number.MAX_SAFE_INTEGER);
+  if (!ship || timeMs === undefined) return undefined;
+  const ghost: Ghost = { ship: ship.id, timeMs, samples: v.samples };
+  return GhostPlayer.from(ghost) ? ghost : undefined;
+}
+
 /** Aproveita o que for válido; um campo estragado não derruba os outros. */
 function parseRecord(v: unknown): LevelRecord | undefined {
   if (!isObject(v) || !isObject(v.stars)) return undefined;
@@ -35,6 +46,7 @@ function parseRecord(v: unknown): LevelRecord | undefined {
   if (levelVersion === undefined) return undefined;
   const bestTimeMs = numberIn(v.bestTimeMs, 1, Number.MAX_SAFE_INTEGER);
   const bestFuelPct = numberIn(v.bestFuelPct, 0, 100);
+  const ghost = parseGhost(v.ghost);
   return {
     levelVersion,
     stars: {
@@ -44,6 +56,7 @@ function parseRecord(v: unknown): LevelRecord | undefined {
     },
     ...(bestTimeMs !== undefined && { bestTimeMs }),
     ...(bestFuelPct !== undefined && { bestFuelPct }),
+    ...(ghost && { ghost }),
   };
 }
 
@@ -60,6 +73,7 @@ export function parseSave(text: string): SaveData | undefined {
   const save = emptySave();
   const ship = SHIPS.find((s) => s.id === raw.selectedShip);
   if (ship) save.selectedShip = ship.id;
+  if (typeof raw.showGhost === 'boolean') save.showGhost = raw.showGhost;
   if (isObject(raw.levels)) {
     for (const [id, value] of Object.entries(raw.levels)) {
       const record = parseRecord(value);
@@ -73,6 +87,7 @@ export function serializeSave(save: SaveData): string {
   return JSON.stringify({
     schemaVersion: SCHEMA_VERSION,
     selectedShip: save.selectedShip,
+    showGhost: save.showGhost,
     levels: Object.fromEntries(save.levels),
   });
 }

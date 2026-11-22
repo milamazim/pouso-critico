@@ -10,6 +10,7 @@ export interface Hints {
   readonly next: string;
   readonly replay: string;
   readonly back: string;
+  readonly ghost: string;
 }
 
 export const HINTS: Readonly<Record<Device, Hints>> = {
@@ -19,6 +20,7 @@ export const HINTS: Readonly<Record<Device, Hints>> = {
     next: ' (Enter)',
     replay: ' (R)',
     back: ' (Esc)',
+    ghost: ' (G)',
   },
   touch: {
     fly: '▲ decola · ◀ ▶ desviam',
@@ -26,6 +28,7 @@ export const HINTS: Readonly<Record<Device, Hints>> = {
     next: '',
     replay: '',
     back: '',
+    ghost: '',
   },
   gamepad: {
     fly: 'A ou RT decola · direcional desvia',
@@ -33,6 +36,7 @@ export const HINTS: Readonly<Record<Device, Hints>> = {
     next: ' (A)',
     replay: ' (Y)',
     back: ' (B)',
+    ghost: ' (Select)',
   },
 };
 

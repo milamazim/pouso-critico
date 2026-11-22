@@ -8,7 +8,7 @@ export interface PadSnapshot {
   readonly buttons: readonly { readonly pressed: boolean; readonly value: number }[];
 }
 
-export type PadAction = 'a' | 'b' | 'y' | 'start' | 'up' | 'down' | 'left' | 'right';
+export type PadAction = 'a' | 'b' | 'y' | 'start' | 'select' | 'up' | 'down' | 'left' | 'right';
 
 export const DEAD_ZONE = 0.35;
 
@@ -17,6 +17,7 @@ const A = 0;
 const B = 1;
 const Y = 3;
 const RT = 7;
+const SELECT = 8;
 const START = 9;
 const DPAD = { up: 12, down: 13, left: 14, right: 15 } as const;
 
@@ -44,6 +45,7 @@ export function padActions(pad: PadSnapshot): Set<PadAction> {
     ['b', isDown(pad, B)],
     ['y', isDown(pad, Y)],
     ['start', isDown(pad, START)],
+    ['select', isDown(pad, SELECT)],
     ['up', isDown(pad, DPAD.up) || y < -DEAD_ZONE],
     ['down', isDown(pad, DPAD.down) || y > DEAD_ZONE],
     ['left', isDown(pad, DPAD.left) || x < -DEAD_ZONE],

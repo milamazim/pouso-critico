@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LEVELS } from '../src/data/levels';
-import { fmtPct } from '../src/render/format';
+import { fmtPct, starLine } from '../src/render/format';
 import type { Level } from '../src/sim/level';
 import { countStars, evaluateStars, recordLanding, type LandingResult, type LevelRecord } from '../src/sim/stars';
 
@@ -57,6 +57,16 @@ describe('recordLanding', () => {
     expect(update.record).toEqual({
       levelVersion: 2, stars: { landing: true, crystals: true, fuel: false }, bestTimeMs: 15000, bestFuelPct: 20,
     });
+  });
+});
+
+describe('starLine', () => {
+  it.each([[0, '☆☆☆'], [1, '★☆☆'], [2, '★★☆'], [3, '★★★']])('%i estrelas ficam em sequência', (n, text) => {
+    expect(starLine(n).join('')).toBe(text);
+  });
+
+  it('pouso e economia sem a coleta não deixam buraco no meio', () => {
+    expect(starLine(countStars({ landing: true, crystals: false, fuel: true })).join('')).toBe('★★☆');
   });
 });
 

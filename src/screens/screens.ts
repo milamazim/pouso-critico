@@ -1,10 +1,10 @@
 import { makeHint } from '../input/device';
 import { SHIP_SIZE } from '../data/physics';
 import { SHIP_ART } from '../data/shipArt';
-import { fmtTime } from '../render/format';
+import { fmtTime, starLine } from '../render/format';
 import { isLevelUnlocked, isShipUnlocked, nextLevelIndex, totalStars, type Records } from '../sim/campaign';
 import type { Level } from '../sim/level';
-import { NO_STARS, type Stars } from '../sim/stars';
+import { countStars, NO_STARS, type Stars } from '../sim/stars';
 import type { ShipId, ShipSpec } from '../sim/types';
 import { make, makeButton, type Menu } from './menu';
 
@@ -23,13 +23,13 @@ export function showTitle(menu: Menu, opts: { stars: number; maxStars: number; o
   );
 }
 
-/** Três marcas, com texto equivalente para leitores de tela. */
+/** Três marcas em sequência, com os nomes das conquistas para leitores de tela. */
 function starRow(stars: Stars): HTMLElement {
   const row = make('span', 'star-row');
   const names = { landing: 'pouso', crystals: 'coleta', fuel: 'economia' } as const;
   const earned: string[] = [];
+  for (const mark of starLine(countStars(stars), '·')) row.append(make('span', mark === '★' ? 'on' : 'off', mark));
   for (const key of ['landing', 'crystals', 'fuel'] as const) {
-    row.append(make('span', stars[key] ? 'on' : 'off', stars[key] ? '★' : '·'));
     if (stars[key]) earned.push(names[key]);
   }
   row.setAttribute('role', 'img');
@@ -158,13 +158,26 @@ export function showShips(
 
 export function showPause(
   menu: Menu,
-  opts: { onResume: () => void; onRestart: () => void; onLevels: () => void },
+  opts: {
+    ghost: boolean;
+    onResume: () => void;
+    onRestart: () => void;
+    /** Devolve o novo estado. */
+    onGhost: () => boolean;
+    onLevels: () => void;
+  },
 ): void {
+  const label = make('span');
+  const setLabel = (on: boolean): void => { label.textContent = `Fantasma: ${on ? 'ligado' : 'desligado'}`; };
+  setLabel(opts.ghost);
+  const ghost = makeButton('', () => setLabel(opts.onGhost()), 'big');
+  ghost.append(label);
   menu.show(
     [
       make('h2', '', 'Pausado'),
       makeButton('Continuar', opts.onResume, 'big', 'back'),
       makeButton('Reiniciar', opts.onRestart, 'big'),
+      ghost,
       makeButton('Escolher fase', opts.onLevels, 'big'),
     ],
     { label: 'Pausa', onBack: opts.onResume },

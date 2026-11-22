@@ -2,6 +2,7 @@ import { DT } from '../core/fixedStep';
 import { SCREEN_H, SCREEN_W, SHIP_SIZE } from '../data/physics';
 import { SHIP_ART, type ShipArt } from '../data/shipArt';
 import type { Attempt } from '../sim/attempt';
+import type { GhostPlayer } from '../sim/ghost';
 import { goalAt } from '../sim/hazards';
 import { PAD_HEIGHT, type Pad, type Point, type WorldId } from '../sim/level';
 import type { TerrainMask } from '../sim/terrain';
@@ -78,6 +79,7 @@ export function drawScene(
   particles: Particles,
   alpha: number,
   shake: number,
+  ghost?: GhostPlayer,
 ): void {
   const offset = (): number => Math.round((Math.random() * 2 - 1) * shake);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -99,6 +101,7 @@ export function drawScene(
   sim.level.crystals.forEach((p, i) => { if (!sim.isCrystalTaken(i)) drawCrystal(ctx, p); });
   sim.level.fuelCans.forEach((p, i) => { if (!sim.isCanTaken(i)) drawFuelCan(ctx, p); });
 
+  if (ghost && sim.phase !== 'landed') drawGhost(ctx, ghost, time, sim.phase === 'ready');
   if (sim.phase !== 'crashed') {
     const a = sim.previous;
     const b = sim.ship;
@@ -107,6 +110,18 @@ export function drawScene(
     drawShip(ctx, SHIP_ART[sim.spec.id], x - HALF, y - HALF, b.engines, Math.floor(sim.time * 30) % 2);
   }
   particles.draw(ctx);
+}
+
+/** Tempo em que o fantasma continua visível depois de pousar. */
+const GHOST_LINGER = 0.5;
+
+/** Translúcido e sem colisão; na partida fica escondido atrás da nave. */
+function drawGhost(ctx: CanvasRenderingContext2D, ghost: GhostPlayer, time: number, ready: boolean): void {
+  if (ready || time > ghost.timeMs / 1000 + GHOST_LINGER) return;
+  const { x, y, engines } = ghost.at(time);
+  ctx.globalAlpha = 0.35;
+  drawShip(ctx, SHIP_ART[ghost.ship], Math.round(x) - HALF, Math.round(y) - HALF, engines, Math.floor(time * 30) % 2);
+  ctx.globalAlpha = 1;
 }
 
 function drawPad(ctx: CanvasRenderingContext2D, pad: Pad, light: string): void {
