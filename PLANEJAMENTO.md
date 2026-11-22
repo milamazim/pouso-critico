@@ -457,10 +457,10 @@ Nenhum impede o início do desenvolvimento.
 | Questão | Proposta atual | Decidir até |
 |---|---|---|
 | Nome final e disponibilidade | Manter "Pouso Crítico"; disponibilidade ainda não pesquisada | Antes de publicar |
-| Hospedagem | GitHub Pages ou itch.io | M9 |
+| Hospedagem | Decidida: GitHub Pages, publicado a cada envio para a `main` depois dos testes (`.github/workflows/pages.yml`) | Concluído |
 | Licença do código | Não definida | Antes de publicar |
 | Jogo instalável e offline (PWA) | Fora do MVP | Depois do MVP |
-| Uso de Git | Decidido: um branch por etapa, commits pequenos com testes passando; no fim, depois do teste de quem joga, o branch entra na `main` e recebe uma marca (`m4`, `m5`...). Ainda sem remoto | Concluído |
+| Uso de Git | Decidido: um branch por etapa, commits pequenos com testes passando; no fim, depois do teste de quem joga, o branch entra na `main` e recebe uma marca (`m4`, `m5`...). Repositório público no GitHub | Concluído |
 
 ## 14. Próximo passo
 
@@ -472,6 +472,6 @@ Pendências, que dependem de pessoas ou aparelhos:
 - ouvir as músicas e os efeitos;
 - testar o balanceamento com o Besouro e a Libélula. A campanha completa com a Vaga-lume, nas 30 estrelas, já foi concluída e aprovada por quem joga.
 
-Antes de publicar: nome, hospedagem e licença (seção 13).
+Código em https://github.com/milamazim/pouso-critico. Continuam em aberto o nome e a licença (seção 13).
 
 Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. Em desenvolvimento, a tecla T abre o painel de ajustes e as fases de teste; na versão publicada, gerada por `npm run build`, ela não faz nada.
