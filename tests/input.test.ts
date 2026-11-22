@@ -111,6 +111,12 @@ describe('GamepadInput', () => {
 });
 
 describe('chooseScale', () => {
+  it('em telas densas aproveita quase todo o espaço', () => {
+    expect(chooseScale(1136, 640, 2)).toBeCloseTo(1136 / 480);
+    expect(chooseScale(1136, 640, 1)).toBe(2);
+    expect(chooseScale(2448, 1400, 2)).toBe(5);
+  });
+
   it.each([
     ['tela cheia 1080p', 1920, 1080, 4],
     ['janela 1080p', 1920, 950, 3],

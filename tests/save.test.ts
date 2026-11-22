@@ -81,6 +81,16 @@ describe('save', () => {
     expect(eraseProgress(save)).toEqual({ ...emptySave(), music: 1, sfx: 2, showGhost: false });
   });
 
+  it('tremor e flashes só ficam definidos quando o jogador escolhe', () => {
+    const parse = (extra: object) => parseSave(JSON.stringify({ schemaVersion: 1, levels: {}, ...extra }))!;
+    expect(parse({}).shake).toBeUndefined();
+    expect(parse({ shake: 'sim', flashes: 1 })).not.toHaveProperty('flashes');
+    expect(parse({ shake: false, flashes: true })).toMatchObject({ shake: false, flashes: true });
+    const chosen = { ...emptySave(), shake: false, flashes: false };
+    expect(parseSave(serializeSave(chosen))).toEqual(chosen);
+    expect(eraseProgress(chosen)).toEqual(chosen);
+  });
+
   it('registra a versão do formato', () => {
     expect(JSON.parse(serializeSave(emptySave()))).toMatchObject({ schemaVersion: 1 });
   });

@@ -29,6 +29,8 @@ interface Graph {
 
 export class GameAudio {
   private graph: Graph | undefined;
+  /** Navegador sem Web Audio: o jogo segue mudo, sem novas tentativas. */
+  private unavailable = false;
   private musicVolume = 6;
   private sfxVolume = 8;
   private ducked = false;
@@ -42,14 +44,16 @@ export class GameAudio {
 
   /** Deve ser chamado dentro de um gesto do jogador; chamadas repetidas são inofensivas. */
   unlock(): void {
+    if (this.unavailable) return;
     try {
       if (!this.graph) {
         this.graph = createGraph();
         this.applyVolumes();
         setInterval(() => this.schedule(), TICK_MS);
       }
-      if (this.graph.ctx.state === 'suspended' && !document.hidden) void this.graph.ctx.resume();
+      if (this.graph.ctx.state === 'suspended' && !document.hidden) settle(this.graph.ctx.resume());
     } catch (error) {
+      this.unavailable = true;
       console.warn('Áudio indisponível', error);
     }
   }
@@ -63,7 +67,7 @@ export class GameAudio {
   /** Para tudo quando a página some e retoma quando volta. */
   setHidden(hidden: boolean): void {
     if (!this.graph) return;
-    void (hidden ? this.graph.ctx.suspend() : this.graph.ctx.resume());
+    settle(hidden ? this.graph.ctx.suspend() : this.graph.ctx.resume());
   }
 
   /** Música mais baixa durante a pausa. */
@@ -227,6 +231,11 @@ export class GameAudio {
     g.sfx.gain.setTargetAtTime(gainOf(this.sfxVolume), now, 0.03);
     g.duck.gain.setTargetAtTime(this.ducked ? 0.35 : 1, now, 0.08);
   }
+}
+
+/** Recusas são esperadas (sem gesto, página saindo) e resolvidas na próxima interação. */
+function settle(promise: Promise<void>): void {
+  promise.catch(() => {});
 }
 
 function createGraph(): Graph {

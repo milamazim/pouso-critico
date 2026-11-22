@@ -10,6 +10,7 @@ interface Particle {
 }
 
 const EXPLOSION_COLORS = ['#fff4c2', '#ffb13b', '#ff6b3b', '#8d90a8'];
+const SOFT_EXPLOSION_COLORS = ['#b5532f', '#83392a', '#8d90a8'];
 const DUST_COLORS = ['#b9b4a3', '#8a8778'];
 
 const pick = (colors: readonly string[]): string => colors[Math.floor(Math.random() * colors.length)]!;
@@ -18,7 +19,7 @@ const pick = (colors: readonly string[]): string => colors[Math.floor(Math.rando
 export class Particles {
   private items: Particle[] = [];
 
-  explode(x: number, y: number, vx: number, vy: number): void {
+  explode(x: number, y: number, vx: number, vy: number, flashes: boolean): void {
     for (let i = 0; i < 48; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = 15 + Math.random() * 95;
@@ -28,7 +29,7 @@ export class Particles {
         vy: Math.sin(angle) * speed - Math.abs(vy) * 0.2,
         life: 0.2 + Math.random() * 0.2,
         size: 1 + Math.floor(Math.random() * 3),
-        color: pick(EXPLOSION_COLORS),
+        color: pick(flashes ? EXPLOSION_COLORS : SOFT_EXPLOSION_COLORS),
       });
     }
   }

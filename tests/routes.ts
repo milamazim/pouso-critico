@@ -27,17 +27,22 @@ export interface Flight {
   readonly cruise: number;
 }
 
-/** Pousos obtidos variando a espera na base e a velocidade, calculados sob demanda. */
-export function* flights(level: Level, ship: Readonly<ShipSpec>, kind: 'direct' | 'crystals'): Generator<Flight> {
+/** Rota completa, com a subida inicial a partir da base. */
+export function routeFor(level: Level, kind: 'direct' | 'crystals'): Point[] {
   const pairs = ROUTES[level.id]?.[kind];
   if (!pairs) throw new Error(`Sem rota para ${level.id}`);
   const points: Point[] = pairs.map(([x, y]) => ({ x, y }));
-  const climb = { x: onPad(level.base).x, y: points[0]!.y };
+  return [{ x: onPad(level.base).x, y: points[0]!.y }, ...points];
+}
+
+/** Pousos obtidos variando a espera na base e a velocidade, calculados sob demanda. */
+export function* flights(level: Level, ship: Readonly<ShipSpec>, kind: 'direct' | 'crystals'): Generator<Flight> {
+  const route = routeFor(level, kind);
   const waits = level.hazards.length > 0 ? [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5] : [0];
   for (const wait of waits) {
     for (const cruise of [25, 30, 35, 40, 45, 50, 55, 60]) {
       const sim = new Attempt(level, { ...ship }, { ...DEFAULT_PHYSICS });
-      fly(sim, [climb, ...points], cruise, wait);
+      fly(sim, route, cruise, wait);
       if (sim.lastOutcome?.type === 'landed') yield { result: sim.lastOutcome.result, wait, cruise };
     }
   }

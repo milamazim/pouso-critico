@@ -244,7 +244,7 @@ Título → Seleção de fase → Seleção de nave → Jogo → Resultado → p
 | HUD | Combustível, VX, VY, cristais e tempo |
 | Pausa | Continuar, reiniciar, fantasma, opções, sair |
 | Resultado | Estrelas, tempo, combustível e novo recorde |
-| Opções | Volumes de música e efeitos; tremor de tela e flashes em M9. O fantasma fica na pausa, e apagar progresso, com confirmação, na seleção de fase |
+| Opções | Volumes de música e efeitos, tremor de tela e flashes. O fantasma fica na pausa, e apagar progresso, com confirmação, na seleção de fase |
 
 Todos os menus funcionam com as três formas de entrada.
 
@@ -271,6 +271,8 @@ interface SaveData {
   showGhost: boolean;
   music: number; // 0 a 10
   sfx: number; // 0 a 10
+  shake?: boolean;
+  flashes?: boolean;
   levels: Record<string, {
     levelVersion: number;
     stars: { landing: boolean; crystals: boolean; fuel: boolean };
@@ -281,7 +283,7 @@ interface SaveData {
 }
 ```
 
-As fases liberadas e o total de estrelas são deduzidos de `levels`, para não haver dois dados que possam discordar. As opções de tremor e flashes entram em M9. Apagar o progresso preserva as opções. Um fantasma corrompido é descartado sozinho, sem perder o resto do registro. Recordes anteriores à M7 não têm gravação e ganham uma no próximo pouso, mesmo mais lento. Um save ilegível é copiado para `pouso-critico-save-backup` antes de ser substituído. Só contam voos da campanha, com fase e nave liberadas e valores padrão.
+As fases liberadas e o total de estrelas são deduzidos de `levels`, para não haver dois dados que possam discordar. `shake` e `flashes` só são gravados quando o jogador escolhe; sem escolha, vale a preferência de movimento do sistema. Apagar o progresso preserva as opções. Um fantasma corrompido é descartado sozinho, sem perder o resto do registro. Recordes anteriores à M7 não têm gravação e ganham uma no próximo pouso, mesmo mais lento. Um save ilegível é copiado para `pouso-critico-save-backup` antes de ser substituído. Só contam voos da campanha, com fase e nave liberadas e valores padrão.
 
 O save fica no `localStorage`. Dados ausentes ou corrompidos não podem impedir o jogo de abrir. Se a gravação falhar, o jogo segue em memória e avisa.
 
@@ -416,15 +418,15 @@ A referência é **algumas semanas em tempo parcial**. O principal marco de deci
 
 ### Critérios de aceite do MVP
 
-- [ ] As 10 fases podem ser concluídas e as 30 estrelas obtidas com a Vaga-lume
-- [ ] A física não muda com a taxa de atualização da tela
-- [ ] O jogo mantém 60 fps em um desktop comum e em um celular intermediário
-- [ ] O reinício leva menos de 0,5 s
-- [ ] Teclado, toque e gamepad completam todo o fluxo
-- [ ] Progresso, recordes e fantasma sobrevivem ao recarregamento
-- [ ] Funciona nas versões atuais de Chrome, Edge, Firefox e Safari
-- [ ] Não há erro no console durante uma campanha completa
-- [ ] Todos os textos estão em português e com acentos corretos
+- [x] As 10 fases podem ser concluídas e as 30 estrelas obtidas com a Vaga-lume (testes automatizados; as três estrelas de uma fase podem exigir mais de um voo)
+- [x] A física não muda com a taxa de atualização da tela
+- [ ] O jogo mantém 60 fps em um desktop comum e em um celular intermediário (60 fps no desktop e com a CPU 4× mais lenta; falta um celular real)
+- [x] O reinício leva menos de 0,5 s (0,4 s medido)
+- [ ] Teclado, toque e gamepad completam todo o fluxo (teclado: campanha inteira; toque e gamepad: fase 1 por simulação, faltam aparelhos reais)
+- [x] Progresso, recordes e fantasma sobrevivem ao recarregamento
+- [ ] Funciona nas versões atuais de Chrome, Edge, Firefox e Safari (campanha completa nos três primeiros e no WebKit para Windows, que não tem áudio; falta o Safari real)
+- [x] Não há erro no console durante uma campanha completa
+- [x] Todos os textos estão em português e com acentos corretos
 
 ## 11. Riscos
 
@@ -460,10 +462,14 @@ Nenhum impede o início do desenvolvimento.
 
 ## 14. Próximo passo
 
-**Situação em 22/11/2026:** M0 a M8 implementadas e na `main`, com as marcas `m4` a `m8`.
+**Situação em 22/11/2026:** M0 a M9 implementadas e na `main` (marcas `m4` a `m9`). O MVP está implementado; faltam as pendências abaixo.
 
-Pendências: celular real (incluindo Safari), gamepad real, avaliação da fase 10 e audição das músicas e efeitos, que só foram verificados por medição do sinal.
+Pendências, que dependem de pessoas ou aparelhos:
 
-Próxima etapa: **M9**, com balanceamento, acessibilidade e testes finais.
+- celular real, incluindo Safari, e gamepad real;
+- ouvir as músicas e os efeitos;
+- avaliar a dificuldade, principalmente das fases 9 e 10.
 
-Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. A tecla T, durante o jogo, abre o painel de ajustes e as fases de teste.
+Antes de publicar: nome, hospedagem e licença (seção 13).
+
+Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. Em desenvolvimento, a tecla T abre o painel de ajustes e as fases de teste; na versão publicada, gerada por `npm run build`, ela não faz nada.

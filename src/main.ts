@@ -72,6 +72,9 @@ audio.setVolumes(save.music, save.sfx);
 
 const particles = new Particles();
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+/** Sem escolha do jogador, vale a preferência de movimento do sistema. */
+const shakeOn = (): boolean => save.shake ?? !reducedMotion.matches;
+const flashesOn = (): boolean => save.flashes ?? !reducedMotion.matches;
 /** Amplitude atual do tremor de tela, em px. */
 let shake = 0;
 
@@ -115,7 +118,8 @@ const keyboard = new Keyboard((code) => {
       toggleGhost();
       break;
     case 'KeyT':
-      panel.toggle();
+      // Ferramenta de desenvolvimento; não existe na versão publicada.
+      if (import.meta.env.DEV) panel.toggle();
       break;
   }
 });
@@ -200,6 +204,18 @@ function openOptions(inGame: boolean): void {
     music: save.music,
     sfx: save.sfx,
     max: MAX_VOLUME,
+    shake: shakeOn(),
+    flashes: flashesOn(),
+    onShake: () => {
+      save.shake = !shakeOn();
+      writeSave(getStore, save);
+      return save.shake;
+    },
+    onFlashes: () => {
+      save.flashes = !flashesOn();
+      writeSave(getStore, save);
+      return save.flashes;
+    },
     onMusic: (v) => change(v, save.sfx),
     onSfx: (v) => change(save.music, v),
     onBack: inGame ? openPause : openTitle,
@@ -347,8 +363,8 @@ function onEvent(event: SimEvent): void {
       break;
     case 'crash':
       audio.explosion();
-      particles.explode(x, y, event.vx, event.vy);
-      if (!reducedMotion.matches) shake = 4;
+      particles.explode(x, y, event.vx, event.vy, flashesOn());
+      if (shakeOn()) shake = 4;
       break;
     case 'landed':
       audio.landing(countStars(event.result.stars));
@@ -437,6 +453,11 @@ fitStage(el('stage'), el('viewport'));
 void loadFont();
 openTitle();
 
+// Só em desenvolvimento: permite que testes de ponta a ponta leiam a simulação.
+if (import.meta.env.DEV) {
+  Object.defineProperty(window, '__game', { value: { get sim() { return sim; } } });
+}
+
 startLoop({
   frame: () => {
     gamepad.poll();
@@ -450,7 +471,12 @@ startLoop({
     shake = Math.max(0, shake - 12 * DT);
   },
   render: (alpha) => {
-    drawScene(ctx, backdrop, sim, particles, alpha, screen === 'game' ? shake : 0, save.showGhost ? ghost : undefined);
+    drawScene(ctx, backdrop, sim, particles, {
+      alpha,
+      shake: screen === 'game' ? shake : 0,
+      flashes: flashesOn(),
+      ghost: save.showGhost ? ghost : undefined,
+    });
     hud.update(sim, save.levels.get(sim.level.id), ghostText());
   },
   isPaused: () => screen !== 'game' || rotated(),

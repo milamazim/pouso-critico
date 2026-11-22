@@ -11,9 +11,9 @@ const IMPACT = 0.25;
 
 type Ctx = CanvasRenderingContext2D;
 
-export function drawHazard(ctx: Ctx, h: Hazard, time: number): void {
+export function drawHazard(ctx: Ctx, h: Hazard, time: number, flashes: boolean): void {
   switch (h.type) {
-    case 'meteor': return drawMeteor(ctx, h, time);
+    case 'meteor': return drawMeteor(ctx, h, time, flashes);
     case 'geyser': return drawGeyser(ctx, h, time);
     case 'laser': return drawLaser(ctx, h, time);
   }
@@ -26,7 +26,7 @@ function disc(ctx: Ctx, cx: number, cy: number, r: number): void {
   }
 }
 
-function drawMeteor(ctx: Ctx, m: Meteor, time: number): void {
+function drawMeteor(ctx: Ctx, m: Meteor, time: number, flashes: boolean): void {
   const length = Math.hypot(m.to.x - m.from.x, m.to.y - m.from.y);
   const ux = (m.to.x - m.from.x) / length;
   const uy = (m.to.y - m.from.y) / length;
@@ -55,11 +55,12 @@ function drawMeteor(ctx: Ctx, m: Meteor, time: number): void {
   }
 
   const sinceImpact = cycleTime(m, time) - activeDuration(m);
-  if (sinceImpact < IMPACT && time > sinceImpact) {
+  if (flashes && sinceImpact < IMPACT && time > sinceImpact) {
     ctx.fillStyle = '#ffb13b';
     disc(ctx, m.to.x, m.to.y, Math.max(1, Math.round(m.radius * (1 - sinceImpact / IMPACT))));
   }
-  if (isWarning(m, time) && Math.floor(time * 8) % 2 === 0) {
+  // Sem flashes, a seta de aviso fica acesa em vez de piscar.
+  if (isWarning(m, time) && (!flashes || Math.floor(time * 8) % 2 === 0)) {
     drawArrow(ctx, clampTo(m.from.x, SCREEN_W), clampTo(m.from.y, SCREEN_H), ux, uy);
   }
 }

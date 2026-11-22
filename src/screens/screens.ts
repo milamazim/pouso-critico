@@ -164,17 +164,12 @@ export function showPause(
     onLevels: () => void;
   },
 ): void {
-  const label = make('span');
-  const setLabel = (on: boolean): void => { label.textContent = `Fantasma: ${on ? 'ligado' : 'desligado'}`; };
-  setLabel(opts.ghost);
-  const ghost = makeButton('', () => setLabel(opts.onGhost()), 'big');
-  ghost.append(label);
   menu.show(
     [
       make('h2', '', 'Pausado'),
       makeButton('Continuar', opts.onResume, 'big', 'back'),
       makeButton('Reiniciar', opts.onRestart, 'big'),
-      ghost,
+      toggleButton('Fantasma', opts.ghost, opts.onGhost),
       makeButton('Opções', opts.onOptions, 'big'),
       makeButton('Escolher fase', opts.onLevels, 'big'),
     ],
@@ -202,14 +197,35 @@ function volumeRow(label: string, initial: number, max: number, onChange: (v: nu
   return row;
 }
 
+/** Botão que mostra e alterna um estado. */
+function toggleButton(
+  label: string,
+  initial: boolean,
+  onToggle: () => boolean,
+  words: readonly [on: string, off: string] = ['ligado', 'desligado'],
+): HTMLButtonElement {
+  const b = makeButton('', () => show(onToggle()), 'big');
+  const show = (on: boolean): void => {
+    b.textContent = `${label}: ${words[on ? 0 : 1]}`;
+    b.setAttribute('aria-pressed', String(on));
+  };
+  show(initial);
+  return b;
+}
+
 export function showOptions(
   menu: Menu,
   opts: {
     music: number;
     sfx: number;
     max: number;
+    shake: boolean;
+    flashes: boolean;
     onMusic: (v: number) => void;
     onSfx: (v: number) => void;
+    /** Devolvem o novo estado. */
+    onShake: () => boolean;
+    onFlashes: () => boolean;
     onBack: () => void;
   },
 ): void {
@@ -219,6 +235,8 @@ export function showOptions(
       make('h2', '', 'Opções'),
       volumeRow('Música', opts.music, opts.max, opts.onMusic),
       volumeRow('Efeitos', opts.sfx, opts.max, opts.onSfx),
+      toggleButton('Tremor de tela', opts.shake, opts.onShake),
+      toggleButton('Flashes', opts.flashes, opts.onFlashes, ['ligados', 'desligados']),
       back,
     ],
     { label: 'Opções', onBack: opts.onBack },

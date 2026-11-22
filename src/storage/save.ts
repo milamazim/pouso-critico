@@ -17,15 +17,20 @@ export interface SaveData {
   /** Volumes de 0 a 10. */
   music: number;
   sfx: number;
+  /** Indefinidos seguem a preferência de movimento do sistema. */
+  shake?: boolean;
+  flashes?: boolean;
 }
 
 /** Parte do `localStorage` usada aqui; permite testar sem navegador. */
 export type Store = Pick<Storage, 'getItem' | 'setItem'>;
 
+/** Parte do save que pertence à campanha, e não às opções. */
+const campaignPart = ({ selectedShip, levels }: SaveData): Pick<SaveData, 'selectedShip' | 'levels'> => ({ selectedShip, levels });
+
 /** Zera a campanha e preserva as opções. */
 export function eraseProgress(save: SaveData): SaveData {
-  const { showGhost, music, sfx } = save;
-  return { ...emptySave(), showGhost, music, sfx };
+  return { ...save, ...campaignPart(emptySave()) };
 }
 
 export function emptySave(): SaveData {
@@ -83,6 +88,8 @@ export function parseSave(text: string): SaveData | undefined {
   const ship = SHIPS.find((s) => s.id === raw.selectedShip);
   if (ship) save.selectedShip = ship.id;
   if (typeof raw.showGhost === 'boolean') save.showGhost = raw.showGhost;
+  if (typeof raw.shake === 'boolean') save.shake = raw.shake;
+  if (typeof raw.flashes === 'boolean') save.flashes = raw.flashes;
   save.music = Math.round(numberIn(raw.music, 0, 10) ?? save.music);
   save.sfx = Math.round(numberIn(raw.sfx, 0, 10) ?? save.sfx);
   if (isObject(raw.levels)) {
@@ -101,6 +108,8 @@ export function serializeSave(save: SaveData): string {
     showGhost: save.showGhost,
     music: save.music,
     sfx: save.sfx,
+    shake: save.shake,
+    flashes: save.flashes,
     levels: Object.fromEntries(save.levels),
   });
 }

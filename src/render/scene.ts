@@ -19,15 +19,24 @@ const GHOST_LINGER = 0.5;
 /** Quadro atual de uma animação contínua. */
 const frameAt = (ms: number, count: number): number => Math.floor(performance.now() / ms) % count;
 
+export interface View {
+  /** Fração até o próximo passo, para interpolar. */
+  readonly alpha: number;
+  /** Amplitude do tremor, em px. */
+  readonly shake: number;
+  /** Desligados, nada pisca nem explode em claro. */
+  readonly flashes: boolean;
+  readonly ghost?: GhostPlayer | undefined;
+}
+
 export function drawScene(
   ctx: Ctx,
   backdrop: HTMLCanvasElement,
   sim: Attempt,
   particles: Particles,
-  alpha: number,
-  shake: number,
-  ghost?: GhostPlayer,
+  view: View,
 ): void {
+  const { alpha, shake, flashes, ghost } = view;
   const offset = (): number => Math.round((Math.random() * 2 - 1) * shake);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.drawImage(backdrop, 0, 0);
@@ -37,14 +46,14 @@ export function drawScene(
   }
 
   const landed = sim.phase === 'landed';
-  drawPad(ctx, sim.level.base, '#5aa9e6', '#2c5f8c');
+  drawPad(ctx, sim.level.base, '#5aa9e6', '#2c5f8c', flashes);
   // Perigos usam o mesmo instante interpolado da nave.
   const time = sim.phase === 'flying' ? Math.max(0, sim.time - (1 - alpha) * DT) : sim.time;
   const goal = goalAt(sim.level.goal, time);
   drawRail(ctx, sim.level.goal);
-  drawPad(ctx, { ...goal, x: Math.round(goal.x) }, landed ? '#6fe08a' : '#ffd54a', landed ? '#2f7a46' : '#8a6a1c');
+  drawPad(ctx, { ...goal, x: Math.round(goal.x) }, landed ? '#6fe08a' : '#ffd54a', landed ? '#2f7a46' : '#8a6a1c', flashes);
   if (!landed) drawGoalMarker(ctx, goal);
-  for (const h of sim.level.hazards) drawHazard(ctx, h, time);
+  for (const h of sim.level.hazards) drawHazard(ctx, h, time, flashes);
 
   // Vaivém: 0, 1, 2, 1.
   const spin = [0, 1, 2, 1][frameAt(160, 4)]!;
@@ -81,7 +90,7 @@ function drawGhost(ctx: Ctx, ghost: GhostPlayer, time: number, ready: boolean): 
 }
 
 /** Plataforma metálica com luzes que correm de uma ponta à outra. */
-function drawPad(ctx: Ctx, pad: Pad, light: string, dim: string): void {
+function drawPad(ctx: Ctx, pad: Pad, light: string, dim: string, flashes: boolean): void {
   const { x, y, width } = pad;
   ctx.fillStyle = '#e6e8f4';
   ctx.fillRect(x, y, width, 1);
@@ -94,7 +103,7 @@ function drawPad(ctx: Ctx, pad: Pad, light: string, dim: string): void {
   const lights = Math.floor(width / 12);
   const lit = frameAt(180, lights + 2);
   for (let i = 0; i < lights; i++) {
-    ctx.fillStyle = i === lit || i === lit - 1 ? light : dim;
+    ctx.fillStyle = !flashes || i === lit || i === lit - 1 ? light : dim;
     ctx.fillRect(x + i * 12 + 4, y, 4, 2);
   }
   ctx.fillStyle = light;
