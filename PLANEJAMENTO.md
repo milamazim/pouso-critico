@@ -462,7 +462,7 @@ Nenhum impede o início do desenvolvimento.
 
 ## 14. Próximo passo
 
-**Situação em 22/11/2026:** M0 a M8 na `main` (marcas `m4` a `m8`). M9 implementada no branch `m9-polimento`, aguardando o teste de quem joga.
+**Situação em 22/11/2026:** M0 a M9 implementadas e na `main` (marcas `m4` a `m9`). O MVP está implementado; faltam as pendências abaixo.
 
 Pendências, que dependem de pessoas ou aparelhos:
 
