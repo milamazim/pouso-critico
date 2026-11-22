@@ -1,6 +1,6 @@
 # Pouso Crítico: documento de planejamento
 
-> Versão 1.0, de 22/11/2026. "Pouso Crítico" é um nome provisório.
+> Versão 1.0, de 22/11/2026.
 >
 > **Como ler:** **[D]** marca o que você decidiu nas perguntas. **[P]** marca uma premissa proposta para completar o plano, que pode ser trocada. Todo valor numérico é ponto de partida e deve ser ajustado jogando.
 
@@ -422,9 +422,9 @@ A referência é **algumas semanas em tempo parcial**. O principal marco de deci
 
 - [x] As 10 fases podem ser concluídas e as 30 estrelas obtidas com a Vaga-lume (testes automatizados, com as três estrelas de cada fase num único voo)
 - [x] A física não muda com a taxa de atualização da tela
-- [ ] O jogo mantém 60 fps em um desktop comum e em um celular intermediário (60 fps no desktop e com a CPU 4× mais lenta; falta um celular real)
+- [ ] O jogo mantém 60 fps em um desktop comum e em um celular intermediário (60 fps no desktop e com a CPU 4× mais lenta; jogado normalmente em dois Android, sem medir a taxa)
 - [x] O reinício leva menos de 0,5 s (0,4 s medido)
-- [ ] Teclado, toque e gamepad completam todo o fluxo (teclado: campanha inteira; toque e gamepad: fase 1 por simulação, faltam aparelhos reais)
+- [x] Teclado, toque e gamepad completam todo o fluxo (teclado: campanha inteira; toque e gamepad: jogados em aparelhos reais, sem problemas relatados)
 - [x] Progresso, recordes e fantasma sobrevivem ao recarregamento
 - [ ] Funciona nas versões atuais de Chrome, Edge, Firefox e Safari (campanha completa nos três primeiros e no WebKit para Windows, que não tem áudio; falta o Safari real)
 - [x] Não há erro no console durante uma campanha completa
@@ -456,9 +456,9 @@ Nenhum impede o início do desenvolvimento.
 
 | Questão | Proposta atual | Decidir até |
 |---|---|---|
-| Nome final e disponibilidade | Manter "Pouso Crítico"; disponibilidade ainda não pesquisada | Antes de publicar |
+| Nome final e disponibilidade | Decidido: **Pouso Crítico**. Nenhum jogo com esse nome foi encontrado em busca na web, no GitHub e no npm; o INPI não foi consultado | Concluído |
 | Hospedagem | Decidida: GitHub Pages, publicado a cada envio para a `main` depois dos testes (`.github/workflows/pages.yml`) | Concluído |
-| Licença do código | Não definida | Antes de publicar |
+| Licença do código | Decidida: **MIT**, autoria de Camila Marques | Concluído |
 | Jogo instalável e offline (PWA) | Fora do MVP | Depois do MVP |
 | Uso de Git | Decidido: um branch por etapa, commits pequenos com testes passando; no fim, depois do teste de quem joga, o branch entra na `main` e recebe uma marca (`m4`, `m5`...). Repositório público no GitHub | Concluído |
 
@@ -466,12 +466,10 @@ Nenhum impede o início do desenvolvimento.
 
 **Situação em 22/11/2026:** M0 a M9 implementadas e na `main` (marcas `m4` a `m9`). O MVP está implementado; faltam as pendências abaixo.
 
-Pendências, que dependem de pessoas ou aparelhos:
+Aprovados por quem joga: campanha completa com a Vaga-lume, balanceamento das três naves, efeitos sonoros, dois celulares Android e gamepad.
 
-- celular real, incluindo Safari, e gamepad real;
-- ouvir as músicas e os efeitos;
-- testar o balanceamento com o Besouro e a Libélula. A campanha completa com a Vaga-lume, nas 30 estrelas, já foi concluída e aprovada por quem joga.
+Pendência: testar no Safari, em iPhone, iPad ou Mac.
 
-Código em https://github.com/milamazim/pouso-critico. Continuam em aberto o nome e a licença (seção 13).
+Código em https://github.com/milamazim/pouso-critico e jogo em https://milamazim.github.io/pouso-critico/.
 
 Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. Em desenvolvimento, a tecla T abre o painel de ajustes e as fases de teste; na versão publicada, gerada por `npm run build`, ela não faz nada.
