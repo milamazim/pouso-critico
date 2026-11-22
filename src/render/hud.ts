@@ -1,3 +1,4 @@
+import { currentDevice, HINTS } from '../input/device';
 import { LOW_FUEL } from '../data/physics';
 import type { Attempt, Outcome } from '../sim/attempt';
 import type { LevelRecord } from '../sim/stars';
@@ -88,7 +89,7 @@ export class Hud {
         const n = level.crystals.length;
         const start = [
           `${level.name} · ${spec.name}`,
-          '↑ decola · ← → desviam · pouse na base amarela',
+          `${HINTS[currentDevice()].fly} · pouse na base amarela`,
           ...(level.goal.motion ? ['base móvel: pouse com "VX rel" verde'] : []),
           `${starBox(stars?.landing)} pousar  ${starBox(stars?.crystals)} ${n} ${n === 1 ? 'cristal' : 'cristais'}  ` +
             `${starBox(stars?.fuel)} ${level.fuelGoalPct}% de combustível`,

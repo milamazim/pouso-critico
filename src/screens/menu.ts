@@ -1,3 +1,5 @@
+import { makeHint, type Hints } from '../input/device';
+
 /** Cria um elemento com classe e texto. */
 export function make<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -10,17 +12,21 @@ export function make<K extends keyof HTMLElementTagNameMap>(
   return el;
 }
 
-export function makeButton(text: string, onClick: () => void, cls = ''): HTMLButtonElement {
+export function makeButton(text: string, onClick: () => void, cls = '', hint?: keyof Hints): HTMLButtonElement {
   const b = make('button', cls, text);
+  if (hint) b.append(makeHint(hint));
   b.type = 'button';
   b.addEventListener('click', onClick);
   return b;
 }
 
-type Arrow = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight';
-const ARROWS: readonly string[] = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+export type Direction = 'up' | 'down' | 'left' | 'right';
 
-/** Camada única que cobre o palco e mostra um menu por vez, navegável por setas. */
+const ARROWS: Readonly<Record<string, Direction>> = {
+  ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+};
+
+/** Camada única que cobre o palco e mostra um menu por vez, navegável por setas e gamepad. */
 export class Menu {
   private readonly root = make('section', 'menu');
   private onBack: (() => void) | undefined;
@@ -29,6 +35,10 @@ export class Menu {
     this.root.hidden = true;
     stage.append(this.root);
     window.addEventListener('keydown', (e) => this.onKey(e));
+  }
+
+  get isOpen(): boolean {
+    return !this.root.hidden;
   }
 
   /** `focus` é o botão que recebe o foco; sem ele, o primeiro disponível. */
@@ -46,6 +56,17 @@ export class Menu {
     this.onBack = undefined;
   }
 
+  back(): void {
+    this.onBack?.();
+  }
+
+  /** Aciona o botão em foco; sem foco, só o escolhe. */
+  activate(): void {
+    const focused = this.buttons().find((b) => b === document.activeElement);
+    if (focused) focused.click();
+    else this.buttons()[0]?.focus();
+  }
+
   private buttons(): HTMLButtonElement[] {
     return [...this.root.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
   }
@@ -56,20 +77,21 @@ export class Menu {
     const target = e.target as Node | null;
     if (target !== document.body && !this.root.contains(target)) return;
 
+    const direction = ARROWS[e.code];
     if (e.code === 'Escape' && !e.repeat && this.onBack) {
       e.preventDefault();
       this.onBack();
-    } else if (ARROWS.includes(e.code)) {
+    } else if (direction) {
       e.preventDefault();
-      this.move(e.code as Arrow);
+      this.move(direction);
     } else if (e.repeat && (e.code === 'Space' || e.code === 'Enter')) {
       // Tecla que já vinha pressionada do voo não deve acionar um botão.
       e.preventDefault();
     }
   }
 
-  /** Leva o foco ao botão mais próximo na direção da seta. */
-  private move(arrow: Arrow): void {
+  /** Leva o foco ao botão mais próximo na direção dada. */
+  move(direction: Direction): void {
     const buttons = this.buttons();
     const current = buttons.find((b) => b === document.activeElement);
     if (!current) {
@@ -84,8 +106,8 @@ export class Menu {
       const to = center(b);
       const dx = to.x - from.x;
       const dy = to.y - from.y;
-      const horizontal = arrow === 'ArrowLeft' || arrow === 'ArrowRight';
-      const sign = arrow === 'ArrowLeft' || arrow === 'ArrowUp' ? -1 : 1;
+      const horizontal = direction === 'left' || direction === 'right';
+      const sign = direction === 'left' || direction === 'up' ? -1 : 1;
       const along = (horizontal ? dx : dy) * sign;
       const across = Math.abs(horizontal ? dy : dx);
       if (along < 2) continue;

@@ -223,7 +223,9 @@ Total: **10 fases, 30 estrelas e 31 cristais**. Pousar libera a próxima fase. E
 | Fantasma | G | Select | Na pausa |
 
 - As entradas são digitais. No analógico, a zona morta é 0,35.
-- Toque usa Pointer Events com multitoque, áreas de pelo menos 48 px CSS e margens para recortes da tela.
+- Toque usa Pointer Events com multitoque, áreas de pelo menos 48 px CSS e margens para recortes da tela. Os botões ficam na faixa de solo, no rodapé, para não cobrir as bases.
+- As dicas na tela acompanham a última entrada usada. Todas as entradas valem ao mesmo tempo.
+- No resultado, o gamepad ignora os botões por 0,6 s, para que o A do motor não pule a tela.
 - No celular, o jogo é horizontal. Na vertical, pausa e pede para girar o aparelho **[P]**.
 - Perder o foco ou desconectar o gamepad limpa os comandos e pausa o jogo.
 
@@ -284,7 +286,7 @@ O save fica no `localStorage`. Dados ausentes ou corrompidos não podem impedir 
 ### 7.1 Pixel art por código
 
 - Sprites são matrizes de texto, com um caractere por cor, convertidas em canvas na inicialização.
-- Escala inteira sempre que possível, com suavização desligada e faixas laterais quando necessário. Em telas pequenas, a escala fracionária é aceita.
+- Escala inteira sempre que aproveitar ao menos 75% do espaço, com suavização desligada e faixas laterais quando necessário. Senão, escala fracionária.
 - Até 16 cores por mundo, com cores constantes para nave, cristal, combustível e perigo.
 - Terreno: polígonos rasterizados com borda clara e textura determinística.
 - Fonte bitmap própria, incluindo `ÁÀÂÃÉÊÍÓÔÕÚÇ`.
@@ -454,10 +456,10 @@ Nenhum impede o início do desenvolvimento.
 
 ## 14. Próximo passo
 
-**Situação em 22/11/2026:** M0 a M5 implementadas. A campanha está completa, com título, seleção de fase e de nave, pausa, resultado e progresso salvo no navegador. M5 está no branch `m5-campanha`, aguardando o teste de quem joga para entrar na `main`.
+**Situação em 22/11/2026:** M0 a M5 concluídas e na `main` (marca `m5`). M6 implementada no branch `m6-entradas`, com toque, gamepad e layout responsivo, aguardando o teste de quem joga em aparelhos reais. Até aqui, toque e gamepad só foram testados por emulação e simulação no Chrome.
 
-Pendências: avaliar a dificuldade das dez fases jogando, o ajuste fino das naves e o teste em um celular real.
+Pendências: celular real (incluindo Safari), gamepad real e avaliação da fase 10.
 
-Próxima etapa: **M6**, com toque, gamepad e layout responsivo.
+Próxima etapa: **M7**, com gravação e reprodução do fantasma.
 
-Para testar: `npm run dev`. A tecla T, durante o jogo, abre o painel de ajustes e as fases de teste. Valores escolhidos no painel devem ser levados para `src/data/physics.ts` e `src/data/ships.ts`.
+Para testar: `npm run dev`. No celular, na mesma rede: `npm run dev -- --host` e abrir o endereço "Network" mostrado. A tecla T, durante o jogo, abre o painel de ajustes e as fases de teste.

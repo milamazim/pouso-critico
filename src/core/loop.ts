@@ -2,6 +2,8 @@ import { FixedStep } from './fixedStep';
 
 /** Liga o passo fixo ao requestAnimationFrame. */
 export function startLoop(opts: {
+  /** Chamado uma vez por quadro, mesmo em pausa. */
+  frame: () => void;
   step: () => void;
   render: (alpha: number) => void;
   isPaused: () => boolean;
@@ -10,6 +12,7 @@ export function startLoop(opts: {
   let last: number | undefined;
 
   const frame = (now: number): void => {
+    opts.frame();
     if (opts.isPaused()) {
       // O tempo parado não pode virar passos ao retomar.
       fixed.reset();
