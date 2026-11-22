@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { LEVELS, TEST_LEVELS } from '../src/data/levels';
+import { LEVELS } from '../src/data/levels';
 import { DEFAULT_PHYSICS, SCREEN_H, SCREEN_W, SHIP_SIZE } from '../src/data/physics';
 import { SHIPS } from '../src/data/ships';
+import { TEST_LEVELS } from '../src/data/testLevels';
 import { Attempt } from '../src/sim/attempt';
 import { activeDuration, hitsPixel, WARNING } from '../src/sim/hazards';
 import { ITEM_SIZE, MAX_GOAL_SPEED, PAD_HEIGHT, type Level, type Point } from '../src/sim/level';

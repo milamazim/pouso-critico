@@ -18,6 +18,8 @@ export type ShipId = 'vagalume' | 'besouro' | 'libelula';
 export interface ShipSpec {
   id: ShipId;
   name: string;
+  /** Estrelas da campanha necessárias para liberar. */
+  unlockStars: number;
   /** px/s² */
   mainThrust: number;
   /** px/s² */

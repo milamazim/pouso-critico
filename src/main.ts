@@ -1,9 +1,10 @@
 import './style.css';
 import { DT } from './core/fixedStep';
 import { startLoop } from './core/loop';
-import { LEVELS, TEST_LEVELS } from './data/levels';
+import { LEVELS } from './data/levels';
 import { DEFAULT_PHYSICS, SCREEN_H, SCREEN_W, SHIP_SIZE } from './data/physics';
 import { SHIPS } from './data/ships';
+import { TEST_LEVELS } from './data/testLevels';
 import { TuningPanel } from './debug/tuningPanel';
 import { Keyboard } from './input/keyboard';
 import { Hud } from './render/hud';
