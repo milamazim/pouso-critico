@@ -155,6 +155,28 @@ describe('fases', () => {
     });
   });
 
+  it('bases móveis da campanha aceitam a nave inicial parada no ar', () => {
+    const moving = LEVELS.filter((l) => l.goal.motion);
+    expect(moving).toHaveLength(2);
+    for (const { goal } of moving) {
+      const { amplitude, period } = goal.motion!;
+      expect((2 * Math.PI * amplitude) / period).toBeLessThan(SHIPS[0]!.landingVx);
+    }
+  });
+
+  it.each(SHIPS.map((s) => [s.name, s] as const))('na fase 9, %s pousa parada no centro do trilho a qualquer momento', (_, ship) => {
+    const level = LEVELS[8]!;
+    const { period } = level.goal.motion!;
+    for (let start = 0; start < period; start += 0.5) {
+      const sim = new Attempt(level, { ...ship }, { ...DEFAULT_PHYSICS });
+      sim.step({ up: true, left: false, right: false });
+      for (let i = 0; i < start * 60; i++) sim.step({ up: false, left: false, right: false });
+      sim.ship = { ...sim.ship, x: onPad(level.goal).x, y: 200, vx: 0, vy: 8 };
+      for (let i = 0; i < 300 && sim.phase === 'flying'; i++) sim.step({ up: sim.ship.vy > 8, left: false, right: false });
+      expect(sim.phase).toBe('landed');
+    }
+  });
+
   it('a campanha tem 10 fases, 30 estrelas e 31 cristais', () => {
     expect(LEVELS).toHaveLength(10);
     expect(LEVELS.reduce((n, l) => n + l.crystals.length, 0)).toBe(31);

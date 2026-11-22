@@ -158,7 +158,7 @@ A posição e o estado são **funções puras do tempo**, com período e fase de
 | Meteoro | Percorre uma reta e reaparece no início | Destrói | Seta piscante na borda por 0,6 s |
 | Gêiser | Liga e desliga; empurra em coluna com 60 px/s² | Não destrói | Borbulhas por 0,6 s |
 | Laser | Barreira que liga e desliga | Destrói quando ligado | Linha tracejada por 0,4 s |
-| Plataforma móvel | Oscila horizontalmente em senoide, a até 20 px/s | É o alvo de pouso | Trilho visível |
+| Plataforma móvel | Oscila horizontalmente em senoide; na campanha, sempre mais devagar que a tolerância lateral da nave inicial (10 px/s) | É o alvo de pouso | Trilho visível |
 
 ### 4.3 Estrelas
 

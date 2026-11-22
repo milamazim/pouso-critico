@@ -184,7 +184,7 @@ export const LEVELS: readonly Level[] = [
   },
   {
     id: 'cave-2',
-    version: 1,
+    version: 2,
     name: 'Alvo Inquieto',
     world: 'cave',
     startFuelPct: 100,
@@ -198,14 +198,15 @@ export const LEVELS: readonly Level[] = [
       pts([196, 0], [280, 0], [262, 64], [240, 106], [218, 64]),
     ],
     base: { x: 36, y: 220, width: 40 },
-    goal: { x: 360, y: 220, width: 48, motion: { amplitude: 36, period: 12, phase: 0 } },
+    // Mais lenta que a tolerância lateral da nave inicial: dá para pousar parado no ar.
+    goal: { x: 360, y: 220, width: 60, motion: { amplitude: 20, period: 18, phase: 0 } },
     crystals: pts([160, 142], [240, 150], [310, 150], [384, 140]),
     fuelCans: [],
     hazards: [],
   },
   {
     id: 'cave-3',
-    version: 1,
+    version: 2,
     name: 'Pouso Crítico',
     world: 'cave',
     startFuelPct: 80,
@@ -218,7 +219,7 @@ export const LEVELS: readonly Level[] = [
       pts([170, 0], [300, 0], [288, 54], [240, 76], [186, 54]),
     ],
     base: { x: 36, y: 220, width: 40 },
-    goal: { x: 370, y: 220, width: 48, motion: { amplitude: 30, period: 11, phase: 0 } },
+    goal: { x: 366, y: 220, width: 56, motion: { amplitude: 23, period: 15, phase: 0 } },
     crystals: pts([122, 146], [196, 144], [264, 140], [316, 130], [420, 140]),
     fuelCans: pts([160, 130], [350, 150]),
     hazards: [

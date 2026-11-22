@@ -83,7 +83,7 @@ export const TEST_LEVELS: readonly Level[] = [
     fuelGoalPct: 20,
     terrain: [HILL],
     base: { x: 60, y: 220, width: 48 },
-    goal: { x: 380, y: 220, width: 48, motion: { amplitude: 30, period: 10, phase: 0 } },
+    goal: { x: 376, y: 220, width: 60, motion: { amplitude: 20, period: 18, phase: 0 } },
     crystals: pts([240, 120]),
     fuelCans: [],
     hazards: [],

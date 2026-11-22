@@ -89,6 +89,7 @@ export class Hud {
         const start = [
           `${level.name} · ${spec.name}`,
           '↑ decola · ← → desviam · pouse na base amarela',
+          ...(level.goal.motion ? ['base móvel: pouse com "VX rel" verde'] : []),
           `${starBox(stars?.landing)} pousar  ${starBox(stars?.crystals)} ${n} ${n === 1 ? 'cristal' : 'cristais'}  ` +
             `${starBox(stars?.fuel)} ${level.fuelGoalPct}% de combustível`,
         ].join('\n');
