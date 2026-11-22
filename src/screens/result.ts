@@ -37,8 +37,12 @@ export class ResultScreen {
     this.root.replaceChildren();
 
     this.line('h2', `Pouso concluído: ${level.name}`);
-    const count = countStars(stars);
-    this.line('p', starLine(count).join(''), 'stars').setAttribute('aria-label', `${count} de 3 estrelas neste voo`);
+    // Total já conquistado na fase; em voos de teste, que não somam, só o do voo.
+    const count = countStars(update ? update.record.stars : stars);
+    this.line('p', starLine(count).join(''), 'stars').setAttribute(
+      'aria-label',
+      `${count} de 3 estrelas ${update ? 'na fase' : 'neste voo'}`,
+    );
 
     this.goal('Pouso', 'landing', stars.landing, update);
     this.goal(`Coleta: ${result.crystals}/${level.crystals.length}`, 'crystals', stars.crystals, update);
